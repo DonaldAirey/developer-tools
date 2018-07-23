@@ -1,0 +1,58 @@
+﻿<ext:DialogWindow x:Class="DarkBond.Tools.WrapMarginDialog"
+				  x:ClassModifier="internal"
+				  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+				  xmlns:ext="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.14.0"
+				  mc:Ignorable="d"
+				  xmlns:local="clr-namespace:DarkBond.Tools;assembly=DarkBond.DeveloperTools"
+				  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				  xmlns:properties="clr-namespace:DarkBond.Tools.Properties"
+				  SizeToContent="Height"
+				  Title="{x:Static properties:Resources.EditorExtensionsTitle}"
+				  Width="200"
+				  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+				  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition/>
+			<RowDefinition/>
+		</Grid.RowDefinitions>
+		<Grid Grid.Row="0"
+			  Margin="4">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+			<TextBlock Grid.Column="0"
+					   Grid.Row="0"
+					   HorizontalAlignment="Right"
+					   Margin="2"
+					   Text="{x:Static properties:Resources.WrapMarginLabel}"
+					   VerticalAlignment="Center"/>
+			<TextBox Grid.Column="1"
+					 Grid.Row="0"
+					 Margin="2"
+					 Text="{Binding WrapMargin}"/>
+		</Grid>
+		<Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
+			  Grid.Row="1">
+			<StackPanel FlowDirection="RightToLeft"
+						Orientation="Horizontal">
+				<Button Command="local:EditorCommands.Cancel"
+						Height="23"
+						IsCancel="True"
+						Margin="4,10"
+						VerticalAlignment="Center"
+						Width="73">Cancel</Button>
+				<Button Command="local:EditorCommands.OK"
+						Height="23"
+						IsDefault="True"
+						Margin="4,10"
+						VerticalAlignment="Center"
+						Width="73">OK</Button>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</ext:DialogWindow>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+    <Metadata>
+        <Identity Id="DeveloperTools.Donald Airey.1e1e0de1-2778-420f-a04c-d57dd932488a" Version="2.0" Language="en-US" Publisher="Donald Roy Airey" />
+        <DisplayName>Developer Tools</DisplayName>
+        <Description xml:space="preserve">A set of custom commands that increases the productivity of C# programmers.</Description>
+        <License>Resources\license.rtf</License>
+        <GettingStartedGuide>Resources\getting started.htm</GettingStartedGuide>
+        <Icon>Resources\tools.ico</Icon>
+        <PreviewImage>Resources\tools.png</PreviewImage>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Version="[15.0,16.0)" Id="Microsoft.VisualStudio.Community" />
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    </Dependencies>
+    <Assets>
+    </Assets>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[15.0,16.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+</PackageManifest>
