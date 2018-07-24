@@ -1,27 +1,27 @@
-﻿// <copyright file="FormatCommentCommand.cs" company="Dark Bond, Inc.">
-//    Copyright © 2016-2017 - Dark Bond, Inc.  All Rights Reserved.
+﻿// <copyright file="FormatCommentCommand.cs" company="Gamma Four, Inc.">
+//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace DarkBond.Tools
+namespace GammaFour.DeveloperTools
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Design;
     using System.Text;
     using System.Text.RegularExpressions;
-    using System.Windows.Threading;
     using EnvDTE;
     using EnvDTE80;
     using Microsoft;
     using Microsoft.VisualStudio.Shell;
+    using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Formats a block comment so it wraps at the specified margin.
+    /// Command handler
     /// </summary>
-    internal static class FormatCommentCommand
+    internal sealed class FormatCommentCommand
     {
         /// <summary>
-        /// The unique command identifier.
+        /// Command identifier.
         /// </summary>
         private const int CommandId = 0x0001;
 
@@ -46,14 +46,14 @@ namespace DarkBond.Tools
         private static DTE2 environment;
 
         /// <summary>
+        /// Gets the instance of the command.
+        /// </summary>
+        private static FormatCommentCommand instance;
+
+        /// <summary>
         /// This provides spacing after the comment delimiter and before the comment.
         /// </summary>
         private static string leftMargin = " ";
-
-        /// <summary>
-        /// The service provider.
-        /// </summary>
-        private static IServiceProvider serviceProvider;
 
         /// <summary>
         /// Recognizes discrete words in the comment stream (XML tags are considered words).
@@ -86,93 +86,39 @@ namespace DarkBond.Tools
         private static Regex xmlStartTag = new Regex("^<[^>]+[^/]>", RegexOptions.Compiled);
 
         /// <summary>
-        /// Initialize the command.
+        /// Initializes a new instance of the <see cref="FormatCommentCommand"/> class.
         /// </summary>
-        /// <param name="package">The package to which this command belongs.</param>
-        internal static void Initialize(Package package)
+        /// <param name="package">Owner package.</param>
+        /// <param name="commandService">Command service to add command to.</param>
+        private FormatCommentCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            // Validate the 'package' argument.
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+            // Validate the arguments.
+            package = package ?? throw new ArgumentNullException(nameof(package));
+            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-            // The VS Package provides services for examining the Visual Studio environment.
-            FormatCommentCommand.serviceProvider = package as IServiceProvider;
-            FormatCommentCommand.environment = FormatCommentCommand.serviceProvider.GetService(typeof(DTE)) as DTE2;
+            // The environment is needed to examine and modify the active document.
+            IServiceProvider serviceProvider = package as IServiceProvider;
+            FormatCommentCommand.environment = serviceProvider.GetService(typeof(DTE)) as DTE2;
             Assumes.Present(FormatCommentCommand.environment);
 
             // This installs our custom command into the environment.
-            OleMenuCommandService oleMenuCommandService =
-                FormatCommentCommand.serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (oleMenuCommandService != null)
-            {
-                oleMenuCommandService.AddCommand(
-                    new MenuCommand(FormatCommentCommand.ExecuteCommand, new CommandID(DeveloperToolsPackage.CommandSet, CommandId)));
-            }
+            commandService.AddCommand(
+                new MenuCommand(this.Execute, new CommandID(DeveloperToolsPackage.CommandSet, FormatCommentCommand.CommandId)));
         }
 
         /// <summary>
-        /// Executes the command.
+        /// Initializes the singleton instance of the command.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="eventArgs">An object that contains no event data.</param>
-        private static void ExecuteCommand(object sender, EventArgs eventArgs)
+        /// <param name="package">Owner package, not null.</param>
+        /// <returns>An awaitable task.</returns>
+        public static async Task InitializeAsync(AsyncPackage package)
         {
-            // This insures we're on the main thread.
-            Dispatcher.CurrentDispatcher.VerifyAccess();
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            // This command will only work when there's an active document to examine.
-            if (FormatCommentCommand.environment.ActiveDocument == null)
-            {
-                return;
-            }
-
-            // Get the selected text from the environment.
-            TextSelection selection = FormatCommentCommand.environment.ActiveDocument.Selection as TextSelection;
-
-            // Get the start end points (round down and up to the start of a line).
-            EditPoint startPoint = selection.AnchorPoint.CreateEditPoint();
-            startPoint.StartOfLine();
-
-            // The initial endpoint is one line below the start.
-            EditPoint endPoint = selection.ActivePoint.CreateEditPoint();
-            endPoint.StartOfLine();
-            endPoint.LineDown(1);
-
-            // If nothing is selected, then figure out what needs to be formatted by the start point up and the end point down.  As long as we
-            // recognize a comment line we'll keep expanding the selection in both directions.
-            if (selection.IsEmpty)
-            {
-                // Find the start of the block.
-                while (!startPoint.AtStartOfDocument)
-                {
-                    if (!FormatCommentCommand.IsCommentLine(startPoint))
-                    {
-                        startPoint.LineDown(1);
-                        break;
-                    }
-
-                    startPoint.LineUp(1);
-                }
-
-                // Find the end of the block.
-                while (!endPoint.AtEndOfDocument)
-                {
-                    if (!FormatCommentCommand.IsCommentLine(endPoint))
-                    {
-                        break;
-                    }
-
-                    endPoint.LineDown(1);
-                }
-            }
-
-            // This will swap the old comment for the new right-margin justified and beautified comment.
-            startPoint.ReplaceText(
-                endPoint,
-                FormatCommentCommand.FormatCommentstring(startPoint.GetText(endPoint)),
-                (int)(vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines | vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces));
+            // Instantiate the command.
+            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            FormatCommentCommand.instance = new FormatCommentCommand(package, commandService);
         }
 
         /// <summary>
@@ -290,9 +236,6 @@ namespace DarkBond.Tools
         /// <returns>True if the line contains only a comment.</returns>
         private static bool IsCommentLine(EditPoint point)
         {
-            // This insures we're on the main thread.
-            Dispatcher.CurrentDispatcher.VerifyAccess();
-
             // This will extract the current line from the given point and determine if it passes the sniff test for a comment.
             EditPoint endOfLine = point.CreateEditPoint();
             endOfLine.EndOfLine();
@@ -421,6 +364,68 @@ namespace DarkBond.Tools
 
             // Reset the wrapping parameters for the next comment line in the block.
             FormatCommentCommand.columnPosition = 0;
+        }
+
+        /// <summary>
+        /// This function is the callback used to execute the command when the menu item is clicked.
+        /// See the constructor to see how the menu item is associated with this function using
+        /// OleMenuCommandService service and MenuCommand class.
+        /// </summary>
+        /// <param name="sender">Event sender.</param>
+        /// <param name="e">Event args.</param>
+        private void Execute(object sender, EventArgs e)
+        {
+            // This command will only work when there's an active document to examine.
+            if (FormatCommentCommand.environment.ActiveDocument == null)
+            {
+                return;
+            }
+
+            // Get the selected text from the environment.
+            TextSelection selection = FormatCommentCommand.environment.ActiveDocument.Selection as TextSelection;
+
+            // Get the start end points (round down and up to the start of a line).
+            EditPoint startPoint = selection.AnchorPoint.CreateEditPoint();
+            startPoint.StartOfLine();
+
+            // The initial endpoint is one line below the start.
+            EditPoint endPoint = selection.ActivePoint.CreateEditPoint();
+            endPoint.StartOfLine();
+            endPoint.LineDown(1);
+
+            // If nothing is selected, then figure out what needs to be formatted by the start point up and the end point down.  As long as we
+            // recognize a comment line we'll keep expanding the selection in both directions.
+            if (selection.IsEmpty)
+            {
+                // Find the start of the block.
+                while (!startPoint.AtStartOfDocument)
+                {
+                    if (!FormatCommentCommand.IsCommentLine(startPoint))
+                    {
+                        startPoint.LineDown(1);
+                        break;
+                    }
+
+                    startPoint.LineUp(1);
+                }
+
+                // Find the end of the block.
+                while (!endPoint.AtEndOfDocument)
+                {
+                    if (!FormatCommentCommand.IsCommentLine(endPoint))
+                    {
+                        break;
+                    }
+
+                    endPoint.LineDown(1);
+                }
+            }
+
+            // This will swap the old comment for the new right-margin justified and beautified comment.
+            startPoint.ReplaceText(
+                endPoint,
+                FormatCommentCommand.FormatCommentstring(startPoint.GetText(endPoint)),
+                (int)(vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines | vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces));
         }
     }
 }

@@ -1,65 +1,52 @@
-﻿// <copyright file="DeveloperToolsPackage.cs" company="Dark Bond, Inc.">
-//    Copyright © 2016-2017 - Dark Bond, Inc.  All Rights Reserved.
+﻿// <copyright file="DeveloperToolsPackage.cs" company="Gamma Four, Inc.">
+//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace DarkBond.Tools
+namespace GammaFour.DeveloperTools
 {
     using System;
     using System.Runtime.InteropServices;
     using System.Threading;
     using Microsoft.VisualStudio.Shell;
+    using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// The Developer Tools Package.
+    /// This is the class that implements the package exposed by this assembly.
     /// </summary>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(DeveloperToolsPackage.PackageGuidstring)]
+    [Guid(DeveloperToolsPackage.PackageGuidString)]
     public sealed class DeveloperToolsPackage : AsyncPackage
     {
         /// <summary>
-        /// DeveloperToolsPackage GUID string.
+        /// Package identifier.
         /// </summary>
-        internal const string PackageGuidstring = "690d896c-c8f4-475a-9d31-9c28e7d1c4ba";
+        public const string PackageGuidString = "690d896c-c8f4-475a-9d31-9c28e7d1c4ba";
 
         /// <summary>
-        /// The command set.
+        /// Gets the Command Set identifier.
         /// </summary>
-        private static Guid commandSetField = new Guid("387d7b3c-a527-463d-96ce-b1ba9b7c1d85");
+        internal static Guid CommandSet { get; } = new Guid("387d7b3c-a527-463d-96ce-b1ba9b7c1d85");
 
         /// <summary>
-        /// Gets the command set used to group the commands in this package.
+        /// Initialization of the package; this method is called right after the package is sited, so this is the place
+        /// where you can put all the initialization code that rely on services provided by VisualStudio.
         /// </summary>
-        /// <value>
-        /// The command set used to group the commands in this package.
-        /// </value>
-        internal static Guid CommandSet
+        /// <param name="cancellationToken">A cancellation token to monitor for initialization cancellation, which can occur when VS is shutting down.</param>
+        /// <param name="progress">A provider for progress updates.</param>
+        /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
+        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            get
-            {
-                return DeveloperToolsPackage.commandSetField;
-            }
-        }
-
-        /// <summary>
-        /// Called when the VSPackage is loaded by Visual Studio.
-        /// </summary>
-        /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="progress">The progress indicator.</param>
-        /// <returns>A <see cref="System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
-        protected override System.Threading.Tasks.Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
-        {
-            // Initialize the commands.
-            FormatCommentCommand.Initialize(this);
-            InsertModuleHeaderCommand.Initialize(this);
-            SetWrapMarginCommand.Initialize(this);
-            SetModuleHeaderCommand.Initialize(this);
-            InsertConstructorHeaderCommand.Initialize(this);
-            FormatXmlCommand.Initialize(this);
-
-            // This is a no-op, but it satisfies the asynchronous interfae.
-            return System.Threading.Tasks.Task.CompletedTask;
+            // When initialized asynchronously, the current thread may be a background thread at this point.
+            // Do any initialization that requires the UI thread after switching to the UI thread.
+            await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await InsertModuleHeaderCommand.InitializeAsync(this);
+            await InsertConstructorHeaderCommand.InitializeAsync(this);
+            await SetModuleHeaderCommand.InitializeAsync(this);
+            await SetWrapMarginCommand.InitializeAsync(this);
+            await FormatCommentCommand.InitializeAsync(this);
+            await FormatXmlCommand.InitializeAsync(this);
         }
     }
 }

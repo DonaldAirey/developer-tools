@@ -1,18 +1,23 @@
-﻿// <copyright file="SetWrapMarginCommand.cs" company="Dark Bond, Inc.">
-//    Copyright © 2016-2017 - Dark Bond, Inc.  All Rights Reserved.
+﻿// <copyright file="SetWrapMarginCommand.cs" company="Gamma Four, Inc.">
+//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace DarkBond.Tools
+namespace GammaFour.DeveloperTools
 {
     using System;
     using System.ComponentModel.Design;
     using System.Globalization;
+    using EnvDTE;
+    using EnvDTE80;
+    using GammaFour.DeveloperTools.Properties;
+    using Microsoft;
     using Microsoft.VisualStudio.Shell;
+    using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Prompts the user for the wrapping margin to use when justifying comments.
+    /// Command handler
     /// </summary>
-    internal static class SetWrapMarginCommand
+    internal sealed class SetWrapMarginCommand
     {
         /// <summary>
         /// Command identifier.
@@ -20,40 +25,64 @@ namespace DarkBond.Tools
         private const int CommandId = 0x0002;
 
         /// <summary>
-        /// Initialize the command.
+        /// The environment for the developer tools.
         /// </summary>
-        /// <param name="package">The package to which this command belongs.</param>
-        internal static void Initialize(Package package)
-        {
-            // Validate the 'package' argument.
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+        private static DTE2 environment;
 
-            // The VS Package provides services for examining the Visual Studio environment.
+        /// <summary>
+        /// Gets the instance of the command.
+        /// </summary>
+        private static SetWrapMarginCommand instance;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SetWrapMarginCommand"/> class.
+        /// </summary>
+        /// <param name="package">Owner package.</param>
+        /// <param name="commandService">Command service to add command to.</param>
+        private SetWrapMarginCommand(AsyncPackage package, OleMenuCommandService commandService)
+        {
+            // Validate the arguments.
+            package = package ?? throw new ArgumentNullException(nameof(package));
+            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
+
+            // The environment is needed to examine and modify the active document.
             IServiceProvider serviceProvider = package as IServiceProvider;
+            SetWrapMarginCommand.environment = serviceProvider.GetService(typeof(DTE)) as DTE2;
+            Assumes.Present(SetWrapMarginCommand.environment);
 
             // This installs our custom command into the environment.
-            OleMenuCommandService oleMenuCommandService = serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (oleMenuCommandService != null)
-            {
-                oleMenuCommandService.AddCommand(
-                    new MenuCommand(SetWrapMarginCommand.ExecuteCommand, new CommandID(DeveloperToolsPackage.CommandSet, CommandId)));
-            }
+            commandService.AddCommand(
+                new MenuCommand(this.Execute, new CommandID(DeveloperToolsPackage.CommandSet, SetWrapMarginCommand.CommandId)));
         }
 
         /// <summary>
-        /// Executes the command.
+        /// Initializes the singleton instance of the command.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="eventArgs">An object that contains no event data.</param>
-        private static void ExecuteCommand(object sender, EventArgs eventArgs)
+        /// <param name="package">Owner package, not null.</param>
+        /// <returns>An awaitable task.</returns>
+        public static async Task InitializeAsync(AsyncPackage package)
+        {
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            // Instantiate the command.
+            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            SetWrapMarginCommand.instance = new SetWrapMarginCommand(package, commandService);
+        }
+
+        /// <summary>
+        /// This function is the callback used to execute the command when the menu item is clicked.
+        /// See the constructor to see how the menu item is associated with this function using
+        /// OleMenuCommandService service and MenuCommand class.
+        /// </summary>
+        /// <param name="sender">Event sender.</param>
+        /// <param name="e">Event args.</param>
+        private void Execute(object sender, EventArgs e)
         {
             // This dialog will prompt the user for the header information.
             WrapMarginDialog wrapmarginDialog = new WrapMarginDialog
             {
-                WrapMargin = Convert.ToString(Properties.Settings.Default.WrapMargin, CultureInfo.InvariantCulture)
+                WrapMargin = Convert.ToString(Settings.Default.WrapMargin, CultureInfo.InvariantCulture)
             };
 
             // Prompt the user and wait for the response.
@@ -63,8 +92,8 @@ namespace DarkBond.Tools
             // has initialized this information or not and that the values are saved immediately after being set.
             if (response.HasValue && response.Value)
             {
-                Properties.Settings.Default.WrapMargin = Convert.ToInt32(wrapmarginDialog.WrapMargin, CultureInfo.InvariantCulture);
-                Properties.Settings.Default.Save();
+                Settings.Default.WrapMargin = Convert.ToInt32(wrapmarginDialog.WrapMargin, CultureInfo.InvariantCulture);
+                Settings.Default.Save();
             }
         }
     }

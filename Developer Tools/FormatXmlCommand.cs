@@ -1,30 +1,29 @@
-﻿// <copyright file="FormatXmlCommand.cs" company="Dark Bond, Inc.">
-//    Copyright © 2016-2017 - Dark Bond, Inc.  All Rights Reserved.
+﻿// <copyright file="FormatXmlCommand.cs" company="Gamma Four, Inc.">
+//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace DarkBond.Tools
+namespace GammaFour.DeveloperTools
 {
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Design;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Text;
-    using System.Windows.Threading;
     using System.Xml;
     using System.Xml.Linq;
     using EnvDTE;
     using EnvDTE80;
+    using GammaFour.DeveloperTools.Properties;
     using Microsoft;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
-    using Properties;
+    using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Beautifies an XML documents by alphabetizing and aligning attributes vertically.
+    /// Command handler
     /// </summary>
-    internal static class FormatXmlCommand
+    internal sealed class FormatXmlCommand
     {
         /// <summary>
         /// Command identifier.
@@ -49,74 +48,49 @@ namespace DarkBond.Tools
         private static DTE2 environment;
 
         /// <summary>
+        /// Gets the instance of the command.
+        /// </summary>
+        private static FormatXmlCommand instance;
+
+        /// <summary>
         /// The service provider for this extension.
         /// </summary>
         private static IServiceProvider serviceProvider;
 
         /// <summary>
-        /// Initialize the command.
+        /// Initializes a new instance of the <see cref="FormatXmlCommand"/> class.
         /// </summary>
-        /// <param name="package">The package to which this command belongs.</param>
-        internal static void Initialize(Package package)
+        /// <param name="package">Owner package.</param>
+        /// <param name="commandService">Command service to add command to.</param>
+        private FormatXmlCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
-            // Validate the 'package' argument.
-            if (package == null)
-            {
-                throw new ArgumentNullException("package");
-            }
+            // Validate the arguments.
+            package = package ?? throw new ArgumentNullException(nameof(package));
+            commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
-            // The VS Package provides services for examining the Visual Studio environment.
+            // The environment is needed to examine and modify the active document.
             FormatXmlCommand.serviceProvider = package as IServiceProvider;
-            FormatXmlCommand.environment = FormatXmlCommand.serviceProvider.GetService(typeof(DTE)) as DTE2;
+            FormatXmlCommand.environment = serviceProvider.GetService(typeof(DTE)) as DTE2;
             Assumes.Present(FormatXmlCommand.environment);
 
             // This installs our custom command into the environment.
-            OleMenuCommandService oleMenuCommandService =
-                FormatXmlCommand.serviceProvider.GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (oleMenuCommandService != null)
-            {
-                oleMenuCommandService.AddCommand(
-                    new MenuCommand(FormatXmlCommand.ExecuteCommand, new CommandID(DeveloperToolsPackage.CommandSet, CommandId)));
-            }
+            commandService.AddCommand(
+                new MenuCommand(this.Execute, new CommandID(DeveloperToolsPackage.CommandSet, FormatXmlCommand.CommandId)));
         }
 
         /// <summary>
-        /// Executes the command.
+        /// Initializes the singleton instance of the command.
         /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="eventArgs">An object that contains no event data.</param>
-        private static void ExecuteCommand(object sender, EventArgs eventArgs)
+        /// <param name="package">Owner package, not null.</param>
+        /// <returns>An awaitable task.</returns>
+        public static async Task InitializeAsync(AsyncPackage package)
         {
-            // This insures we're on the main thread.
-            Dispatcher.CurrentDispatcher.VerifyAccess();
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            string name = FormatXmlCommand.environment.ActiveDocument.FullName;
-            string extension = Path.GetExtension(FormatXmlCommand.environment.ActiveDocument.FullName).ToUpperInvariant();
-            if (FormatXmlCommand.XmlExtensions.Contains(extension))
-            {
-                // Get the selected text from the environment and make a note of where we are in the document.
-                TextSelection selection = FormatXmlCommand.environment.ActiveDocument.Selection as TextSelection;
-                int line = selection.ActivePoint.Line;
-                int offset = selection.ActivePoint.LineCharOffset;
-
-                // Get the start end points (round down and up to the start of a line).
-                EditPoint startPoint = selection.AnchorPoint.CreateEditPoint();
-                startPoint.StartOfDocument();
-
-                // The initial endpoint is one line below the start.
-                EditPoint endPoint = selection.ActivePoint.CreateEditPoint();
-                endPoint.EndOfDocument();
-
-                // This will replace the XML in the current module with the scrubbed and beautified XML.
-                startPoint.ReplaceText(
-                    endPoint,
-                    FormatXmlCommand.ScrubDocument(startPoint.GetText(endPoint), extension),
-                    (int)(vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines | vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces));
-
-                // There will likely be some dramatic changes to the format of the document.  This will restore the cursor to where it was in the
-                // document before we beautified it.
-                selection.MoveToLineAndOffset(line, offset);
-            }
+            // Instantiate the command.
+            OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
+            FormatXmlCommand.instance = new FormatXmlCommand(package, commandService);
         }
 
         /// <summary>
@@ -169,8 +143,6 @@ namespace DarkBond.Tools
         /// <param name="source">The source XML document to order and beautify.</param>
         /// <param name="extension">The extension.  Used to determine tab spacing.</param>
         /// <returns>The text of the scrubbed and beautified document.</returns>
-        [SuppressMessage("Microsoft.Usage", "CA2202:Do not dispose objects multiple times", Justification = "Can't make this error go away through restructuring")]
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "General Exception is desired in this scenario.")]
         private static string ScrubDocument(string source, string extension)
         {
             // Used to write the final document in the form of a long string.
@@ -227,6 +199,44 @@ namespace DarkBond.Tools
                 // The result of beautifying a long string of XML is another long string that is scrubbed and beautified.  This string will be used
                 // to replace the original content of the module.
                 return stringWriter.ToString();
+            }
+        }
+
+        /// <summary>
+        /// This function is the callback used to execute the command when the menu item is clicked.
+        /// See the constructor to see how the menu item is associated with this function using
+        /// OleMenuCommandService service and MenuCommand class.
+        /// </summary>
+        /// <param name="sender">Event sender.</param>
+        /// <param name="e">Event args.</param>
+        private void Execute(object sender, EventArgs e)
+        {
+            string name = FormatXmlCommand.environment.ActiveDocument.FullName;
+            string extension = Path.GetExtension(FormatXmlCommand.environment.ActiveDocument.FullName).ToUpperInvariant();
+            if (FormatXmlCommand.XmlExtensions.Contains(extension))
+            {
+                // Get the selected text from the environment and make a note of where we are in the document.
+                TextSelection selection = FormatXmlCommand.environment.ActiveDocument.Selection as TextSelection;
+                int line = selection.ActivePoint.Line;
+                int offset = selection.ActivePoint.LineCharOffset;
+
+                // Get the start end points (round down and up to the start of a line).
+                EditPoint startPoint = selection.AnchorPoint.CreateEditPoint();
+                startPoint.StartOfDocument();
+
+                // The initial endpoint is one line below the start.
+                EditPoint endPoint = selection.ActivePoint.CreateEditPoint();
+                endPoint.EndOfDocument();
+
+                // This will replace the XML in the current module with the scrubbed and beautified XML.
+                startPoint.ReplaceText(
+                    endPoint,
+                    FormatXmlCommand.ScrubDocument(startPoint.GetText(endPoint), extension),
+                    (int)(vsEPReplaceTextOptions.vsEPReplaceTextNormalizeNewlines | vsEPReplaceTextOptions.vsEPReplaceTextTabsSpaces));
+
+                // There will likely be some dramatic changes to the format of the document.  This will restore the cursor to where it was in the
+                // document before we beautified it.
+                selection.MoveToLineAndOffset(line, offset);
             }
         }
     }

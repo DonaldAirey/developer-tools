@@ -1,8 +1,8 @@
-﻿// <copyright file="ModuleHeaderDialog.xaml.cs" company="Dark Bond, Inc.">
-//    Copyright © 2016-2017 - Dark Bond, Inc.  All Rights Reserved.
+﻿// <copyright file="ModuleHeaderDialog.xaml.cs" company="Gamma Four, Inc.">
+//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace DarkBond.Tools
+namespace GammaFour.DeveloperTools
 {
     using System;
     using System.Windows;
