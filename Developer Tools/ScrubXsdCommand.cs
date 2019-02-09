@@ -104,7 +104,7 @@ namespace GammaFour.DeveloperTools
                     // Read the source document.
                     using (StringReader stringReader = new StringReader(source))
                     {
-                        XmlSchemaDocument xmlSchemaDocument = new XmlSchemaDocument(stringReader.ReadToEnd(), string.Empty);
+                        XmlSchemaDocument xmlSchemaDocument = new XmlSchemaDocument(stringReader.ReadToEnd());
 
                         // Regurgitate the schema as an XDocument
                         XElement schemaElement = new XElement(

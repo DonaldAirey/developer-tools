@@ -30,13 +30,9 @@ namespace GammaFour.DataModelGenerator.Common
         /// Initializes a new instance of the <see cref="XmlSchemaDocument"/> class.
         /// </summary>
         /// <param name="fileContents">The contents of a file that specifies the schema in XML.</param>
-        /// <param name="customToolNamespace">The namespace for the generated code.</param>
-        public XmlSchemaDocument(string fileContents, string customToolNamespace)
+        public XmlSchemaDocument(string fileContents)
             : this(XmlReader.Create(new StringReader(fileContents)))
         {
-            // Initialize the object.
-            this.CustomToolNamespace = customToolNamespace;
-
             // The root element of the schema definition.
             XElement rootElement = this.Root.Element(XmlSchemaDocument.Element);
 
@@ -112,11 +108,6 @@ namespace GammaFour.DataModelGenerator.Common
                 return rootElement.Elements(XmlSchemaDocument.Keyref).Cast<ForeignKeyElement>().ToList();
             }
         }
-
-        /// <summary>
-        /// Gets the destionation namespace for the generated data model.
-        /// </summary>
-        public string CustomToolNamespace { get; private set; }
 
         /// <summary>
         /// Gets the name of the data model.
