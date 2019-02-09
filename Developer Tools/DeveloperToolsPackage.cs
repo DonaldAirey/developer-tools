@@ -47,6 +47,7 @@ namespace GammaFour.DeveloperTools
             await SetWrapMarginCommand.InitializeAsync(this);
             await FormatCommentCommand.InitializeAsync(this);
             await FormatXmlCommand.InitializeAsync(this);
+            await ScrubXsdCommand.InitializeAsync(this);
         }
     }
 }

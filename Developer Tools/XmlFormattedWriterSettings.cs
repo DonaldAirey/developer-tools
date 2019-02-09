@@ -4,7 +4,6 @@
 // <author>Donald Roy Airey</author>
 namespace GammaFour.DeveloperTools
 {
-    using System;
     using System.Text;
     using System.Xml;
 
@@ -13,16 +12,6 @@ namespace GammaFour.DeveloperTools
     /// </summary>
     internal class XmlFormattedWriterSettings
     {
-        /// <summary>
-        /// The size of the tabs.
-        /// </summary>
-        private int tabSize = 4;
-
-        /// <summary>
-        /// The encapsulated XmlWriterSettings object.
-        /// </summary>
-        private XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-
         /// <summary>
         /// Sets the type of text encoding to use.
         /// </summary>
@@ -33,7 +22,7 @@ namespace GammaFour.DeveloperTools
         {
             set
             {
-                this.xmlWriterSettings.Encoding = value;
+                this.BaseSettings.Encoding = value;
             }
         }
 
@@ -47,12 +36,12 @@ namespace GammaFour.DeveloperTools
         {
             get
             {
-                return this.xmlWriterSettings.OmitXmlDeclaration;
+                return this.BaseSettings.OmitXmlDeclaration;
             }
 
             set
             {
-                this.xmlWriterSettings.OmitXmlDeclaration = value;
+                this.BaseSettings.OmitXmlDeclaration = value;
             }
         }
 
@@ -62,18 +51,7 @@ namespace GammaFour.DeveloperTools
         /// <value>
         /// The size of a tab.
         /// </value>
-        internal int TabSize
-        {
-            get
-            {
-                return this.tabSize;
-            }
-
-            set
-            {
-                this.tabSize = value;
-            }
-        }
+        internal int TabSize { get; set; } = 4;
 
         /// <summary>
         /// Gets the base XmlWriterSettings.
@@ -81,12 +59,6 @@ namespace GammaFour.DeveloperTools
         /// <value>
         /// The base XmlWriterSettings.
         /// </value>
-        internal XmlWriterSettings BaseSettings
-        {
-            get
-            {
-                return this.xmlWriterSettings;
-            }
-        }
+        internal XmlWriterSettings BaseSettings { get; } = new XmlWriterSettings();
     }
 }
