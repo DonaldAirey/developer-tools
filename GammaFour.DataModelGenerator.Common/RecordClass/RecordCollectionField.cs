@@ -1,62 +1,52 @@
-// <copyright file="RowChangedEvent.cs" company="Gamma Four, Inc.">
+// <copyright file="RecordCollectionField.cs" company="Gamma Four, Inc.">
 //    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common.RecordSet
+namespace GammaFour.DataModelGenerator.Common.RecordClass
 {
     using System;
     using System.Collections.Generic;
+    using GammaFour.DataModelGenerator.Common;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     /// <summary>
-    /// Creates a field that holds the column.
+    /// Creates a field to hold the current contents of the record.
     /// </summary>
-    public class RowChangedEvent : SyntaxElement
+    public class RecordCollectionField : SyntaxElement
     {
-        /// <summary>
-        /// The event type.
-        /// </summary>
-        private SimpleNameSyntax eventType;
-
         /// <summary>
         /// The unique constraint schema.
         /// </summary>
         private TableElement tableElement;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RowChangedEvent"/> class.
+        /// Initializes a new instance of the <see cref="RecordCollectionField"/> class.
         /// </summary>
         /// <param name="tableElement">The column schema.</param>
-        public RowChangedEvent(TableElement tableElement)
+        public RecordCollectionField(TableElement tableElement)
         {
             // Initialize the object.
             this.tableElement = tableElement;
-            this.Name = "RowChanged";
-
-            // The type of event.
-            this.eventType = SyntaxFactory.GenericName(
-                SyntaxFactory.Identifier("EventHandler"))
-            .WithTypeArgumentList(
-                SyntaxFactory.TypeArgumentList(
-                    SyntaxFactory.SingletonSeparatedList<TypeSyntax>(
-                        SyntaxFactory.IdentifierName(this.tableElement.Name + "RowChangeEventArgs")))
-                .WithLessThanToken(SyntaxFactory.Token(SyntaxKind.LessThanToken))
-                .WithGreaterThanToken(SyntaxFactory.Token(SyntaxKind.GreaterThanToken)));
+            this.Name = this.tableElement.Name.ToPlural().ToVariableName();
 
             //        /// <summary>
-            //        /// Occurs when a row has changed.
+            //        /// The set to which this record belongs.
             //        /// </summary>
-            //        public event EventHandler<ConfigurationRowChangeEventArgs> RowChanged;
-            this.Syntax = SyntaxFactory.EventFieldDeclaration(
-                SyntaxFactory.VariableDeclaration(this.eventType)
-                .WithVariables(
-                    SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
-                        SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier(this.Name)))))
-            .WithModifiers(RowChangedEvent.Modifiers)
-            .WithEventKeyword(SyntaxFactory.Token(SyntaxKind.EventKeyword))
-            .WithLeadingTrivia(RowChangedEvent.DocumentationComment);
+            //        private CountrySet countries;
+            this.Syntax = SyntaxFactory.FieldDeclaration(
+                    SyntaxFactory.VariableDeclaration(
+                        SyntaxFactory.IdentifierName($"{this.tableElement}Collection"))
+                    .WithVariables(
+                        SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
+                            SyntaxFactory.VariableDeclarator(
+                                SyntaxFactory.Identifier(this.Name)))))
+                .WithModifiers(
+                    SyntaxFactory.TokenList(
+                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword)))
+                .WithModifiers(RecordCollectionField.Modifiers)
+                .WithLeadingTrivia(RecordCollectionField.DocumentationComment);
         }
 
         /// <summary>
@@ -70,7 +60,7 @@ namespace GammaFour.DataModelGenerator.Common.RecordSet
                 List<SyntaxTrivia> comments = new List<SyntaxTrivia>();
 
                 //        /// <summary>
-                //        /// Occurs when a row has changed.
+                //        /// The current contents of the record.
                 //        /// </summary>
                 comments.Add(
                     SyntaxFactory.Trivia(
@@ -94,7 +84,7 @@ namespace GammaFour.DataModelGenerator.Common.RecordSet
                                                 SyntaxFactory.TriviaList()),
                                             SyntaxFactory.XmlTextLiteral(
                                                 SyntaxFactory.TriviaList(SyntaxFactory.DocumentationCommentExterior("         ///")),
-                                                " Occurs when a row has changed.",
+                                                " The set to which this record belongs.",
                                                 string.Empty,
                                                 SyntaxFactory.TriviaList()),
                                             SyntaxFactory.XmlTextNewLine(
@@ -126,11 +116,11 @@ namespace GammaFour.DataModelGenerator.Common.RecordSet
         {
             get
             {
-                // internal
+                // private
                 return SyntaxFactory.TokenList(
                     new[]
                     {
-                        SyntaxFactory.Token(SyntaxKind.PublicKeyword)
+                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
                     });
             }
         }

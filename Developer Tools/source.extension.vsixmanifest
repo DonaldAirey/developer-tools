@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="DeveloperTools.Donald Airey.1e1e0de1-2778-420f-a04c-d57dd932488a" Version="2.5" Language="en-US" Publisher="Donald Roy Airey" />
+        <Identity Id="DeveloperTools.Donald Airey.1e1e0de1-2778-420f-a04c-d57dd932488a" Version="2.7" Language="en-US" Publisher="Donald Roy Airey" />
         <DisplayName>Developer Tools</DisplayName>
         <Description xml:space="preserve">A set of custom commands that increases the productivity of C# programmers.</Description>
         <License>Resources\license.rtf</License>

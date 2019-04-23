@@ -2,10 +2,6 @@
 //    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-// <copyright file="ColumnElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
-// </copyright>
-// <author>Donald Roy Airey</author>
 namespace GammaFour.DataModelGenerator.Common
 {
     using System;
@@ -38,14 +34,14 @@ namespace GammaFour.DataModelGenerator.Common
         };
 
         /// <summary>
+        /// The type for this column.
+        /// </summary>
+        private ColumnType columnType = new ColumnType();
+
+        /// <summary>
         /// The default, if any, for this column.
         /// </summary>
         private object defaultValue;
-
-        /// <summary>
-        /// The maximum length of a variable length data type.
-        /// </summary>
-        private int maximumLength;
 
         /// <summary>
         /// Indicates that the column has a default value.
@@ -53,14 +49,29 @@ namespace GammaFour.DataModelGenerator.Common
         private bool hasDefault;
 
         /// <summary>
+        /// The index of the column in the table.
+        /// </summary>
+        private int? index;
+
+        /// <summary>
+        /// A value indicating whether ths column is part of the primary key.
+        /// </summary>
+        private bool? isPrimaryKey;
+
+        /// <summary>
         /// Indicates that the type information has been initialized.
         /// </summary>
         private bool isTypeInfoInitialized = false;
 
         /// <summary>
-        /// The type for this column.
+        /// A value indicating whether the column is part of a parent primary key.
         /// </summary>
-        private ColumnType columnType = new ColumnType();
+        private bool? isInParentKey;
+
+        /// <summary>
+        /// The maximum length of a variable length data type.
+        /// </summary>
+        private int maximumLength;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColumnElement"/> class.
@@ -73,23 +84,23 @@ namespace GammaFour.DataModelGenerator.Common
             this.Name = this.Attribute(XmlSchemaDocument.ObjectName).Value;
 
             // This determines if the column allows nulls.
-            XAttribute isRowVersionAttribute = this.Attribute(XmlSchemaDocument.IsRowVersion);
+            XAttribute isRowVersionAttribute = this.Attribute(XmlSchemaDocument.IsRowVersionName);
             this.IsRowVersion = isRowVersionAttribute == null ? false : Convert.ToBoolean(isRowVersionAttribute.Value, CultureInfo.InvariantCulture);
 
             // This determines if the column allows nulls.
-            XAttribute minOccursAttribute = this.Attribute(XmlSchemaDocument.MinOccurs);
+            XAttribute minOccursAttribute = this.Attribute(XmlSchemaDocument.MinOccursName);
             this.columnType.IsNullable = minOccursAttribute == null ? false : Convert.ToInt32(minOccursAttribute.Value, CultureInfo.InvariantCulture) == 0;
 
             // Determine the IsIdentityColumn property.
-            XAttribute autoIncrementAttribute = this.Attribute(XmlSchemaDocument.AutoIncrement);
+            XAttribute autoIncrementAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementName);
             this.IsAutoIncrement = autoIncrementAttribute == null ? false : Convert.ToBoolean(autoIncrementAttribute.Value, CultureInfo.InvariantCulture);
 
             // Determine the AutoIncrementSeed property.
-            XAttribute autoIncrementSeedAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementSeed);
+            XAttribute autoIncrementSeedAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementSeedName);
             this.AutoIncrementSeed = autoIncrementSeedAttribute == null ? 0 : Convert.ToInt32(autoIncrementSeedAttribute.Value, CultureInfo.InvariantCulture);
 
             // Determine the AutoIncrementStop property
-            XAttribute autoIncrementStepAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementStep);
+            XAttribute autoIncrementStepAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementStepName);
             this.AutoIncrementStep = autoIncrementStepAttribute == null ? 1 : Convert.ToInt32(autoIncrementStepAttribute.Value, CultureInfo.InvariantCulture);
         }
 
@@ -144,7 +155,12 @@ namespace GammaFour.DataModelGenerator.Common
         {
             get
             {
-                return this.Table.Columns.IndexOf(this);
+                if (!this.index.HasValue)
+                {
+                    this.index = this.Table.Columns.IndexOf(this);
+                }
+
+                return this.index.Value;
             }
         }
 
@@ -161,9 +177,14 @@ namespace GammaFour.DataModelGenerator.Common
             get
             {
                 // This will examine the primary key to see if the column is part of the key.
-                return (from ce in this.Table.PrimaryKey.Columns
-                        where ce.Column == this
-                        select ce).Any();
+                if (this.isPrimaryKey.HasValue)
+                {
+                    this.isPrimaryKey = (from ce in this.Table.PrimaryKey.Columns
+                                         where ce.Column == this
+                                         select ce).Any();
+                }
+
+                return this.isPrimaryKey.Value;
             }
         }
 
@@ -174,16 +195,21 @@ namespace GammaFour.DataModelGenerator.Common
         {
             get
             {
-                // Examine each of the parent relations to see if the column is used.
-                var list = from fke in this.Table.ParentKeys
-                           from ce in fke.Columns
-                           where ce.Column == this
-                           select ce;
+                if (!this.isInParentKey.HasValue)
+                {
+                    // Examine each of the parent relations to see if the column is used.
+                    var list = from fke in this.Table.ParentKeys
+                               from ce in fke.Columns
+                               where ce.Column == this
+                               select ce;
 
-                return (from fke in this.Table.ParentKeys
-                        from ce in fke.Columns
-                        where ce.Column == this
-                        select ce).Any();
+                    this.isInParentKey = (from fke in this.Table.ParentKeys
+                                          from ce in fke.Columns
+                                          where ce.Column == this
+                                          select ce).Any();
+                }
+
+                return this.isInParentKey.Value;
             }
         }
 
@@ -387,14 +413,14 @@ namespace GammaFour.DataModelGenerator.Common
             // This section will determine the datatype of the column.  There are three basic flavors.  The first is a simple type which is extracted
             // from the 'type' attribute in the column description element.  The second is through a 'anyType' specification which is an instruction
             // to reference a literal expression for the type.  The third method restricts one of the basic types by setting a maximum length for it.
-            XAttribute typeAttribute = this.Attribute(XmlSchemaDocument.Type);
+            XAttribute typeAttribute = this.Attribute(XmlSchemaDocument.TypeName);
             if (typeAttribute == null)
             {
                 // This section will parse a predefined datatype with a restriction.  The 'base' attribute of the 'restriction' element contains the
                 // predefined datatype specification.
-                XElement simpleElement = this.Element(XmlSchemaDocument.SimpleType);
-                XElement restrictionElement = simpleElement.Element(XmlSchemaDocument.Restriction);
-                XAttribute baseAttribute = restrictionElement.Attribute(XmlSchemaDocument.Base);
+                XElement simpleElement = this.Element(XmlSchemaDocument.SimpleTypeName);
+                XElement restrictionElement = simpleElement.Element(XmlSchemaDocument.RestrictionName);
+                XAttribute baseAttribute = restrictionElement.Attribute(XmlSchemaDocument.BaseName);
 
                 // Translate the predefined datatype into a CLR type.
                 string[] xNameParts = baseAttribute.Value.Split(':');
@@ -407,8 +433,8 @@ namespace GammaFour.DataModelGenerator.Common
                 this.columnType.IsValueType = type.GetTypeInfo().IsValueType;
 
                 // Extract the maximum length for this column's data.
-                XElement maxLengthElement = restrictionElement.Element(XmlSchemaDocument.MaxLength);
-                this.maximumLength = Convert.ToInt32(maxLengthElement.Attribute(XmlSchemaDocument.Value).Value, CultureInfo.InvariantCulture);
+                XElement maxLengthElement = restrictionElement.Element(XmlSchemaDocument.MaxLengthName);
+                this.maximumLength = Convert.ToInt32(maxLengthElement.Attribute(XmlSchemaDocument.ValueName).Value, CultureInfo.InvariantCulture);
             }
             else
             {
@@ -417,12 +443,12 @@ namespace GammaFour.DataModelGenerator.Common
                 string[] xNameParts = typeAttribute.Value.Split(':');
                 XNamespace xNamespace = this.Document.Root.GetNamespaceOfPrefix(xNameParts[0]);
                 XName typeXName = XName.Get(xNameParts[1], xNamespace.NamespaceName);
-                XAttribute dataTypeAttribute = this.Attribute(XmlSchemaDocument.DataType);
-                if (typeXName == XmlSchemaDocument.AnyType || dataTypeAttribute != null)
+                XAttribute dataTypeAttribute = this.Attribute(XmlSchemaDocument.DataTypeName);
+                if (typeXName == XmlSchemaDocument.AnyTypeName || dataTypeAttribute != null)
                 {
                     this.columnType.FullName = dataTypeAttribute.Value;
                     this.columnType.IsArray = false;
-                    this.columnType.IsPredefined = false;
+                    this.columnType.IsPredefined = XmlSchemaDocument.SystemTypes.Contains(dataTypeAttribute.Value);
                     this.columnType.IsValueType = true;
                 }
                 else
@@ -437,7 +463,7 @@ namespace GammaFour.DataModelGenerator.Common
             }
 
             // This evaluates whether the column has a default value and, if it does, converts the text of the default to the native version.
-            XAttribute defaultAttribute = this.Attribute(XmlSchemaDocument.Default);
+            XAttribute defaultAttribute = this.Attribute(XmlSchemaDocument.DefaultName);
             this.hasDefault = defaultAttribute != null;
             Func<string, object> defaultFunction = null;
             if (defaultAttribute != null && ColumnElement.conversionFunctions.TryGetValue(this.columnType.FullName, out defaultFunction))

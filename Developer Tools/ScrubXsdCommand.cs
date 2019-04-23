@@ -35,7 +35,6 @@ namespace GammaFour.DeveloperTools
 
         // Private Static Fields
         private static XNamespace xs = "http://www.w3.org/2001/XMLSchema";
-        private static XNamespace gfdata = "urn:schemas-gamma-four-com:xml-gfdata";
 
         /// <summary>
         /// The environment for the developer tools.
@@ -123,8 +122,12 @@ namespace GammaFour.DeveloperTools
                             }
                         }
 
-                        //  <xs:element name="Domain">
+                        //  <xs:element name="Domain" gfdata:isSecure>
                         XElement dataModelElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", xmlSchemaDocument.Name));
+                        if (xmlSchemaDocument.IsSecure)
+                        {
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, true);
+                        }
 
                         //    <xs:complexType>
                         XElement dataModelComlexTypeElement = new XElement(ScrubXsdCommand.xs + "complexType");
@@ -201,10 +204,10 @@ namespace GammaFour.DeveloperTools
             //        <xs:element name="Account">
             XElement xElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", tableElement.Name));
 
-            // gfdata:isPersistent="false"
-            if (!tableElement.IsPersistent)
+            // gfdata:isVolatile="true"
+            if (tableElement.IsVolatile)
             {
-                xElement.SetAttributeValue(ScrubXsdCommand.gfdata + "isPersistent", false);
+                xElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, true);
             }
 
             // gfdata:verbs="Delete,Get,Put"
@@ -221,7 +224,7 @@ namespace GammaFour.DeveloperTools
 
             if (!string.IsNullOrEmpty(verbs))
             {
-                xElement.Add(new XAttribute(ScrubXsdCommand.gfdata + "verbs", verbs));
+                xElement.Add(new XAttribute(XmlSchemaDocument.VerbsName, verbs));
             }
 
             //           <xs:complexType>
@@ -321,13 +324,13 @@ namespace GammaFour.DeveloperTools
             // Microsoft uses a custom decoration to describe data types that are not part of the cannon XML Schema datatypes.
             if (dataType != string.Empty)
             {
-                xElement.Add(new XAttribute(ScrubXsdCommand.gfdata + "DataType", dataType));
+                xElement.Add(new XAttribute(XmlSchemaDocument.DataTypeName, dataType));
             }
 
             // This attribute controls whether the column is autoincremented by the database server.
             if (columnElement.IsAutoIncrement)
             {
-                xElement.Add(new XAttribute(ScrubXsdCommand.gfdata + "AutoIncrement", true));
+                xElement.Add(new XAttribute(XmlSchemaDocument.AutoIncrementName, true));
             }
 
             // Emit the column's type.
@@ -358,7 +361,7 @@ namespace GammaFour.DeveloperTools
             // Provide an explicit default value for all column elements.
             if (!columnElement.ColumnType.IsNullable && columnElement.DefaultValue != null)
             {
-                xElement.Add(new XAttribute("default", columnElement.DefaultValue.ToString()));
+                xElement.Add(new XAttribute("default", columnElement.DefaultValue.ToString().ToLower()));
             }
 
             // This describes the column of a table.
@@ -383,7 +386,7 @@ namespace GammaFour.DeveloperTools
 
             if (uniqueConstraintSchema.IsPrimaryKey)
             {
-                uniqueElement.Add(new XAttribute(ScrubXsdCommand.gfdata + "IsPrimaryKey", true));
+                uniqueElement.Add(new XAttribute(XmlSchemaDocument.IsPrimaryKeyName, true));
             }
 
             uniqueElement.Add(

@@ -1,4 +1,4 @@
-// <copyright file="RowChangingEvent.cs" company="Gamma Four, Inc.">
+// <copyright file="RecordChangingEvent.cs" company="Gamma Four, Inc.">
 //    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
@@ -13,21 +13,21 @@ namespace GammaFour.DataModelGenerator.Common.RecordSet
     /// <summary>
     /// Creates a field that holds the column.
     /// </summary>
-    public class RowChangingEvent : SyntaxElement
+    public class RecordChangingEvent : SyntaxElement
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RowChangingEvent"/> class.
+        /// Initializes a new instance of the <see cref="RecordChangingEvent"/> class.
         /// </summary>
         /// <param name="tableElement">The column schema.</param>
-        public RowChangingEvent(TableElement tableElement)
+        public RecordChangingEvent(TableElement tableElement)
         {
             // Initialize the object.
-            this.Name = "RowChanging";
+            this.Name = "RecordChanging";
 
             //        /// <summary>
             //        /// Occurs when a row has changed.
             //        /// </summary>
-            //        public event EventHandler<RecordChangeEventArgs<Buyer>> RowChanging;
+            //        public event EventHandler<RecordChangeEventArgs<Buyer>> RecordChanging;
             this.Syntax = SyntaxFactory.EventFieldDeclaration(
                     SyntaxFactory.VariableDeclaration(
                         SyntaxFactory.GenericName(
@@ -44,9 +44,9 @@ namespace GammaFour.DataModelGenerator.Common.RecordSet
                     .WithVariables(
                         SyntaxFactory.SingletonSeparatedList<VariableDeclaratorSyntax>(
                             SyntaxFactory.VariableDeclarator(
-                                SyntaxFactory.Identifier("RowChanging")))))
-            .WithModifiers(RowChangingEvent.Modifiers)
-            .WithLeadingTrivia(RowChangingEvent.DocumentationComment);
+                                SyntaxFactory.Identifier("RecordChanging")))))
+            .WithModifiers(RecordChangingEvent.Modifiers)
+            .WithLeadingTrivia(RecordChangingEvent.DocumentationComment);
         }
 
         /// <summary>
