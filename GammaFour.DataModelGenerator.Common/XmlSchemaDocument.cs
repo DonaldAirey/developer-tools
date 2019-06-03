@@ -351,7 +351,7 @@ namespace GammaFour.DataModelGenerator.Common
             { XName.Get("unsignedByte", XmlSchemaNamespace), typeof(byte?) },
             { XName.Get("unsignedInt", XmlSchemaNamespace), typeof(uint?) },
             { XName.Get("unsignedLong", XmlSchemaNamespace), typeof(ulong?) },
-            { XName.Get("unsignedShort", XmlSchemaNamespace), typeof(ushort?) }
+            { XName.Get("unsignedShort", XmlSchemaNamespace), typeof(ushort?) },
         };
 
         /// <summary>
@@ -372,7 +372,7 @@ namespace GammaFour.DataModelGenerator.Common
             { XName.Get("unsignedByte", XmlSchemaNamespace), typeof(byte) },
             { XName.Get("unsignedInt", XmlSchemaNamespace), typeof(uint) },
             { XName.Get("unsignedLong", XmlSchemaNamespace), typeof(ulong) },
-            { XName.Get("unsignedShort", XmlSchemaNamespace), typeof(ushort) }
+            { XName.Get("unsignedShort", XmlSchemaNamespace), typeof(ushort) },
         };
 
         /// <summary>
@@ -394,7 +394,7 @@ namespace GammaFour.DataModelGenerator.Common
             typeof(byte).FullName,
             typeof(uint).FullName,
             typeof(ulong).FullName,
-            typeof(ushort).FullName
+            typeof(ushort).FullName,
         };
     }
 }

@@ -15,7 +15,7 @@ namespace GammaFour.DeveloperTools
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class SetWrapMarginCommand
     {
@@ -82,7 +82,7 @@ namespace GammaFour.DeveloperTools
             // This dialog will prompt the user for the header information.
             WrapMarginDialog wrapmarginDialog = new WrapMarginDialog
             {
-                WrapMargin = Convert.ToString(Settings.Default.WrapMargin, CultureInfo.InvariantCulture)
+                WrapMargin = Convert.ToString(Settings.Default.WrapMargin, CultureInfo.InvariantCulture),
             };
 
             // Prompt the user and wait for the response.

@@ -240,7 +240,7 @@ namespace GammaFour.DataModelGenerator.Common
         /// </summary>
         /// <param name="left">The left operand.</param>
         /// <param name="right">The right operand.</param>
-        /// <returns>-1 if left &lt; right, 0 if left == right, 1 if left &gt; right</returns>
+        /// <returns>-1 if left &lt; right, 0 if left == right, 1 if left &gt; right.</returns>
         public static int Compare(ConstraintElement left, ConstraintElement right)
         {
             // Don't use operators or you'll recurse.  If the left and right objects are the same object, then they're equal.

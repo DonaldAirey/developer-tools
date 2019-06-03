@@ -27,6 +27,6 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Post a resource to the domain.
         /// </summary>
-        Post
+        Post,
     }
 }

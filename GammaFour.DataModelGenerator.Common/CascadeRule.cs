@@ -27,6 +27,6 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// The reference to the parent record is set to a default.
         /// </summary>
-        SetDefault
+        SetDefault,
     }
 }

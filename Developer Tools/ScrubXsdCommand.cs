@@ -7,13 +7,10 @@ namespace GammaFour.DeveloperTools
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.Design;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
-    using System.Xml;
     using System.Xml.Linq;
-    using System.Xml.Schema;
     using EnvDTE;
     using EnvDTE80;
     using GammaFour.DataModelGenerator.Common;
@@ -122,11 +119,19 @@ namespace GammaFour.DeveloperTools
                             }
                         }
 
-                        //  <xs:element name="Domain" gfdata:isSecure>
+                        //  <xs:element name="Domain">
                         XElement dataModelElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", xmlSchemaDocument.Name));
+
+                        //  This flag indicates that the API uses tokens for authentication.
                         if (xmlSchemaDocument.IsSecure)
                         {
                             dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, true);
+                        }
+
+                        //  This flag indicates that the interface is not committed to a peristent store.
+                        if (xmlSchemaDocument.IsVolatile)
+                        {
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, true);
                         }
 
                         //    <xs:complexType>

@@ -21,7 +21,7 @@ namespace GammaFour.DeveloperTools
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class FormatXmlCommand
     {
@@ -39,7 +39,7 @@ namespace GammaFour.DeveloperTools
             ".XML",
             ".XAML",
             ".VSCT",
-            ".WXS"
+            ".WXS",
         };
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace GammaFour.DeveloperTools
                         {
                             Encoding = Encoding.UTF8,
                             OmitXmlDeclaration = isXaml,
-                            TabSize = isXaml ? 4 : 2
+                            TabSize = isXaml ? 4 : 2,
                         };
                         XmlWriter xmlWriter = XmlFormattedWriter.Create(stringWriter, xmlFormattedWriterSettings);
                         targetDocument.WriteTo(xmlWriter);

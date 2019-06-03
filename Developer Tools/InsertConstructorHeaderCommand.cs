@@ -15,7 +15,7 @@ namespace GammaFour.DeveloperTools
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class InsertConstructorHeaderCommand
     {

@@ -59,7 +59,7 @@ namespace GammaFour.DataModelGenerator.Common.ForeignKeyIndexClass
                 return SyntaxFactory.TokenList(
                     new[]
                     {
-                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword)
+                        SyntaxFactory.Token(SyntaxKind.PrivateKeyword),
                     });
             }
         }
@@ -116,7 +116,7 @@ namespace GammaFour.DataModelGenerator.Common.ForeignKeyIndexClass
                                                 SyntaxFactory.TriviaList(),
                                                 Environment.NewLine,
                                                 string.Empty,
-                                                SyntaxFactory.TriviaList())
+                                                SyntaxFactory.TriviaList()),
                                         }))))));
 
                 // This is the complete document comment.

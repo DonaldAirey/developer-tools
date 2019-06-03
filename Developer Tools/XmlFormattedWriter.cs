@@ -134,7 +134,7 @@ namespace GammaFour.DeveloperTools
         /// Returns the closest prefix defined in the current namespace scope for the namespace URI.
         /// </summary>
         /// <param name="ns">The namespace URI whose prefix you want to find.</param>
-        /// <returns>The lookup prefix for the given namespace</returns>
+        /// <returns>The lookup prefix for the given namespace.</returns>
         public override string LookupPrefix(string ns)
         {
             throw new NotImplementedException();

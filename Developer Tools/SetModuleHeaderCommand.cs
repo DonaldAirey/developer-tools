@@ -14,7 +14,7 @@ namespace GammaFour.DeveloperTools
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
-    /// Command handler
+    /// Command handler.
     /// </summary>
     internal sealed class SetModuleHeaderCommand
     {
@@ -79,7 +79,7 @@ namespace GammaFour.DeveloperTools
             {
                 Author = Settings.Default.Author,
                 Company = Settings.Default.Company,
-                CopyrightNotice = Settings.Default.CopyrightNotice
+                CopyrightNotice = Settings.Default.CopyrightNotice,
             };
 
             // Prompt the user and wait for the response.

@@ -6,6 +6,7 @@ namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Xml.Linq;
 
@@ -63,6 +64,10 @@ namespace GammaFour.DataModelGenerator.Common
         {
             // Extract the name from the schema.
             this.Name = this.Attribute(XmlSchemaDocument.ObjectName).Value;
+
+            // This tells us whether the table is persisted in a database or not.
+            XAttribute isVolatileAttribute = this.Attribute(XmlSchemaDocument.IsVolatileName);
+            this.IsVolatile = isVolatileAttribute == null ? false : Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture);
 
             // The verbs tell us what actions to support in the controller when it's built.
             XAttribute verbAttribute = this.Attribute(XmlSchemaDocument.VerbsName);
@@ -332,7 +337,7 @@ namespace GammaFour.DataModelGenerator.Common
         /// </summary>
         /// <param name="left">The left operand.</param>
         /// <param name="right">The right operand.</param>
-        /// <returns>-1 if left &lt; right, 0 if left == right, 1 if left &gt; right</returns>
+        /// <returns>-1 if left &lt; right, 0 if left == right, 1 if left &gt; right.</returns>
         public static int Compare(TableElement left, TableElement right)
         {
             // Don't use operators or you'll recurse.  If the left and right objects are the same object, then they're equal.
