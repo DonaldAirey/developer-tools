@@ -13,7 +13,7 @@ namespace GammaFour.DeveloperTools
     using System.Xml.Linq;
     using EnvDTE;
     using EnvDTE80;
-    using GammaFour.DataModelGenerator.Common;
+    using GammaFour.XmlSchemaDocument;
     using GammaFour.DeveloperTools.Properties;
     using Microsoft;
     using Microsoft.VisualStudio.Shell;
@@ -76,8 +76,8 @@ namespace GammaFour.DeveloperTools
         /// <returns>An awaitable task.</returns>
         public static async Task InitializeAsync(AsyncPackage package)
         {
-            // Verify the current thread is the UI thread.
-            ThreadHelper.ThrowIfNotOnUIThread();
+            // Execute this method on the UI thread.
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             // Instantiate the command.
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -458,6 +458,9 @@ namespace GammaFour.DeveloperTools
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             string name = ScrubXsdCommand.environment.ActiveDocument.FullName;
             string extension = Path.GetExtension(ScrubXsdCommand.environment.ActiveDocument.FullName).ToUpperInvariant();
             if (extension == ".XSD")

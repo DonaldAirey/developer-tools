@@ -114,7 +114,7 @@ namespace GammaFour.DeveloperTools
         public static async Task InitializeAsync(AsyncPackage package)
         {
             // Verify the current thread is the UI thread.
-            ThreadHelper.ThrowIfNotOnUIThread();
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             // Instantiate the command.
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -236,6 +236,9 @@ namespace GammaFour.DeveloperTools
         /// <returns>True if the line contains only a comment.</returns>
         private static bool IsCommentLine(EditPoint point)
         {
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // This will extract the current line from the given point and determine if it passes the sniff test for a comment.
             EditPoint endOfLine = point.CreateEditPoint();
             endOfLine.EndOfLine();
@@ -375,6 +378,9 @@ namespace GammaFour.DeveloperTools
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             // This command will only work when there's an active document to examine.
             if (FormatCommentCommand.environment.ActiveDocument == null)
             {

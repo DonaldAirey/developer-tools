@@ -85,8 +85,8 @@ namespace GammaFour.DeveloperTools
         /// <returns>An awaitable task.</returns>
         public static async Task InitializeAsync(AsyncPackage package)
         {
-            // Verify the current thread is the UI thread.
-            ThreadHelper.ThrowIfNotOnUIThread();
+            // Execute this method on the UI thread.
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             // Instantiate the command.
             OleMenuCommandService commandService = await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -211,6 +211,9 @@ namespace GammaFour.DeveloperTools
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
+            // Verify the current thread is the UI thread.
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             string name = FormatXmlCommand.environment.ActiveDocument.FullName;
             string extension = Path.GetExtension(FormatXmlCommand.environment.ActiveDocument.FullName).ToUpperInvariant();
             if (FormatXmlCommand.XmlExtensions.Contains(extension))

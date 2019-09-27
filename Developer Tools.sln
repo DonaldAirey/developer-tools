@@ -1,66 +1,31 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2035
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Developer Tools", "Developer Tools\Developer Tools.csproj", "{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Developer Tools", "Developer Tools\Developer Tools.csproj", "{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GammaFour.DataModelGenerator.Common", "GammaFour.DataModelGenerator.Common\GammaFour.DataModelGenerator.Common.csproj", "{0B8C6A20-9F63-4291-95FF-6456C28D9E35}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GammaFour.XmlSchemaDocument", "GammaFour.XmlSchemaDocument\GammaFour.XmlSchemaDocument.csproj", "{57B45902-F8FA-4781-80E4-E099FD0D7826}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Development|Any CPU = Development|Any CPU
-		Development|x64 = Development|x64
-		Development|x86 = Development|x86
 		Production|Any CPU = Production|Any CPU
-		Production|x64 = Production|x64
-		Production|x86 = Production|x86
-		Staging|Any CPU = Staging|Any CPU
-		Staging|x64 = Staging|x64
-		Staging|x86 = Staging|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|Any CPU.ActiveCfg = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|Any CPU.Build.0 = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|x64.ActiveCfg = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|x64.Build.0 = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|x86.ActiveCfg = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Development|x86.Build.0 = Development|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|Any CPU.ActiveCfg = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|Any CPU.Build.0 = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|x64.ActiveCfg = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|x64.Build.0 = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|x86.ActiveCfg = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Production|x86.Build.0 = Production|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|Any CPU.Build.0 = Staging|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|x64.ActiveCfg = Staging|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|x64.Build.0 = Staging|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|x86.ActiveCfg = Staging|Any CPU
-		{B4B4BC28-CBA3-4B0F-A58D-FB120FD1344A}.Staging|x86.Build.0 = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|Any CPU.ActiveCfg = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|Any CPU.Build.0 = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|x64.ActiveCfg = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|x64.Build.0 = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|x86.ActiveCfg = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Development|x86.Build.0 = Development|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|Any CPU.ActiveCfg = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|Any CPU.Build.0 = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|x64.ActiveCfg = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|x64.Build.0 = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|x86.ActiveCfg = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Production|x86.Build.0 = Production|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|Any CPU.Build.0 = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|x64.ActiveCfg = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|x64.Build.0 = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|x86.ActiveCfg = Staging|Any CPU
-		{0B8C6A20-9F63-4291-95FF-6456C28D9E35}.Staging|x86.Build.0 = Staging|Any CPU
+		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Development|Any CPU.ActiveCfg = Development|Any CPU
+		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Development|Any CPU.Build.0 = Development|Any CPU
+		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Production|Any CPU.ActiveCfg = Production|Any CPU
+		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Production|Any CPU.Build.0 = Production|Any CPU
+		{57B45902-F8FA-4781-80E4-E099FD0D7826}.Development|Any CPU.ActiveCfg = Development|Any CPU
+		{57B45902-F8FA-4781-80E4-E099FD0D7826}.Development|Any CPU.Build.0 = Development|Any CPU
+		{57B45902-F8FA-4781-80E4-E099FD0D7826}.Production|Any CPU.ActiveCfg = Production|Any CPU
+		{57B45902-F8FA-4781-80E4-E099FD0D7826}.Production|Any CPU.Build.0 = Production|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0AC87A1A-56E4-4684-A2B6-CF637EA7E01C}
+		SolutionGuid = {0C455C9A-8B81-4B96-930B-77AA9915265B}
 	EndGlobalSection
 EndGlobal

@@ -2,7 +2,7 @@
 //    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.XmlSchemaDocument
 {
     using System;
     using System.Collections.Generic;
@@ -32,7 +32,9 @@ namespace GammaFour.DataModelGenerator.Common
         /// </summary>
         /// <param name="fileContents">The contents of a file that specifies the schema in XML.</param>
         public XmlSchemaDocument(string fileContents)
+#pragma warning disable CA2000 // Dispose objects before losing scope
             : this(XmlReader.Create(new StringReader(fileContents)))
+#pragma warning restore CA2000 // Dispose objects before losing scope
         {
             // The root element of the schema definition.
             XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);

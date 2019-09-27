@@ -1,64 +1,89 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <Extern href="vsshlids.h" />
-  <Commands package="guidDeveloperToolsPackage">
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+  <Commands package="guidDeveloperToolsCommandPackage">
+    <Groups>
+      <Group guid="commandSet" id="MyMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS"/>
+      </Group>
+    </Groups>
     <Buttons>
-      <Button guid="guidCommandSet" id="FormatCommentCommand" type="Button">
+      <Button guid="commandSet" id="FormatCommentCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Format Comment Block</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="InsertModuleHeaderCommand" type="Button">
+      <Button guid="commandSet" id="InsertModuleHeaderCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Insert Module Header</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="SetWrapMarginCommand" type="Button">
+      <Button guid="commandSet" id="SetWrapMarginCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Wrap Margin...</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="SetModuleHeaderCommand" type="Button">
+      <Button guid="commandSet" id="SetModuleHeaderCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Header Values...</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="InsertConstructorHeaderCommand" type="Button">
+      <Button guid="commandSet" id="InsertConstructorHeaderCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Insert Constructor Header</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="FormatXmlCommand" type="Button">
+      <Button guid="commandSet" id="FormatXmlCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Beautify XAML Document</ButtonText>
         </Strings>
       </Button>
-      <Button guid="guidCommandSet" id="ScrubXsdCommand" type="Button">
+      <Button guid="commandSet" id="ScrubXsdCommandId" priority="0x0100" type="Button">
+        <Parent guid="commandSet" id="MyMenuGroup" />
         <Strings>
           <ButtonText>Beautify XML Schema (XSD) Document</ButtonText>
         </Strings>
       </Button>
     </Buttons>
+    <Bitmaps>
+      <Bitmap guid="guidImages" href="Resources\FormatCommentCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
+    </Bitmaps>
   </Commands>
   <KeyBindings>
-    <KeyBinding guid="guidCommandSet" id="FormatCommentCommand" key1="1" mod1="Alt" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="SetWrapMarginCommand" key1="1" mod1="Alt Shift" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="InsertModuleHeaderCommand" key1="2" mod1="Alt" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="SetModuleHeaderCommand" key1="2" mod1="Alt Shift" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="InsertConstructorHeaderCommand" key1="3" mod1="Alt" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="FormatXmlCommand" key1="5" mod1="Alt" editor="guidVSStd97" />
-    <KeyBinding guid="guidCommandSet" id="ScrubXsdCommand" key1="5" mod1="Alt Shift" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="FormatCommentCommandId" key1="1" mod1="Alt" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="SetWrapMarginCommandId" key1="1" mod1="Alt Shift" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="InsertModuleHeaderCommandId" key1="2" mod1="Alt" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="SetModuleHeaderCommandId" key1="2" mod1="Alt Shift" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="InsertConstructorHeaderCommandId" key1="3" mod1="Alt" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="FormatXmlCommandId" key1="4" mod1="Alt" editor="guidVSStd97" />
+    <KeyBinding guid="commandSet" id="ScrubXsdCommandId" key1="5" mod1="Alt" editor="guidVSStd97" />
   </KeyBindings>
   <Symbols>
-    <GuidSymbol name="guidDeveloperToolsPackage" value="{690d896c-c8f4-475a-9d31-9c28e7d1c4ba}" />
-    <GuidSymbol name="guidCommandSet" value="{387d7b3c-a527-463d-96ce-b1ba9b7c1d85}">
-      <IDSymbol name="FormatCommentCommand" value="0x0001" />
-      <IDSymbol name="SetWrapMarginCommand" value="0x0002" />
-      <IDSymbol name="InsertModuleHeaderCommand" value="0x0003" />
-      <IDSymbol name="SetModuleHeaderCommand" value="0x0004" />
-      <IDSymbol name="InsertConstructorHeaderCommand" value="0x0005" />
-      <IDSymbol name="FormatXmlCommand" value="0x0006" />
-      <IDSymbol name="ScrubXsdCommand" value="0x0007" />
+    <GuidSymbol name="guidDeveloperToolsCommandPackage" value="{e86fa1fd-2e90-40a9-a80d-45e405cb5e6b}" />
+    <GuidSymbol name="commandSet" value="{4a8eeab1-3e50-413b-ada5-40f8b62cd1fb}">
+      <IDSymbol name="MyMenuGroup" value="0x1020" />
+      <IDSymbol name="FormatCommentCommandId" value="0x0001" />
+      <IDSymbol name="SetWrapMarginCommandId" value="0x0002" />
+      <IDSymbol name="InsertModuleHeaderCommandId" value="0x0003" />
+      <IDSymbol name="SetModuleHeaderCommandId" value="0x0004" />
+      <IDSymbol name="InsertConstructorHeaderCommandId" value="0x0005" />
+      <IDSymbol name="FormatXmlCommandId" value="0x0006" />
+      <IDSymbol name="ScrubXsdCommandId" value="0x0007" />
+    </GuidSymbol>
+    <GuidSymbol name="guidImages" value="{8ea5af81-cc39-4ac5-80fb-ebfad6a05cdf}" >
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+      <IDSymbol name="bmpPicStrikethrough" value="6" />
     </GuidSymbol>
   </Symbols>
 </CommandTable>

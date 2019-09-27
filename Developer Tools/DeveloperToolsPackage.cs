@@ -22,12 +22,12 @@ namespace GammaFour.DeveloperTools
         /// <summary>
         /// Package identifier.
         /// </summary>
-        public const string PackageGuidString = "690d896c-c8f4-475a-9d31-9c28e7d1c4ba";
+        public const string PackageGuidString = "e86fa1fd-2e90-40a9-a80d-45e405cb5e6b";
 
         /// <summary>
         /// Gets the Command Set identifier.
         /// </summary>
-        internal static Guid CommandSet { get; } = new Guid("387d7b3c-a527-463d-96ce-b1ba9b7c1d85");
+        internal static Guid CommandSet { get; } = new Guid("4a8eeab1-3e50-413b-ada5-40f8b62cd1fb");
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
@@ -41,12 +41,12 @@ namespace GammaFour.DeveloperTools
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            await FormatCommentCommand.InitializeAsync(this);
+            await FormatXmlCommand.InitializeAsync(this);
             await InsertModuleHeaderCommand.InitializeAsync(this);
             await InsertConstructorHeaderCommand.InitializeAsync(this);
             await SetModuleHeaderCommand.InitializeAsync(this);
             await SetWrapMarginCommand.InitializeAsync(this);
-            await FormatCommentCommand.InitializeAsync(this);
-            await FormatXmlCommand.InitializeAsync(this);
             await ScrubXsdCommand.InitializeAsync(this);
         }
     }
