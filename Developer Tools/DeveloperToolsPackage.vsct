@@ -52,9 +52,6 @@
         </Strings>
       </Button>
     </Buttons>
-    <Bitmaps>
-      <Bitmap guid="guidImages" href="Resources\FormatCommentCommand.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows, bmpPicStrikethrough"/>
-    </Bitmaps>
   </Commands>
   <KeyBindings>
     <KeyBinding guid="commandSet" id="FormatCommentCommandId" key1="1" mod1="Alt" editor="guidVSStd97" />

@@ -43,13 +43,17 @@ namespace GammaFour.XmlSchemaDocument
             this.Name = this.Root.Element(XmlSchemaDocument.ElementName).Attribute("name").Value;
             this.TargetNamespace = this.Root.Attribute("targetNamespace").Value;
 
-            // This tells us whether to provide an interface to Entity Framework or not.
-            XAttribute isVolatileAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsVolatileName);
-            this.IsVolatile = isVolatileAttribute == null ? false : Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture);
+            // This specifies the data domain used by the REST generated code.
+            XAttribute domainAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.DomainName);
+            this.Domain = domainAttribute == null ? null : domainAttribute.Value;
 
             // This tells us whether the generated controllers should require authorization.
             XAttribute isSecureAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsSecureName);
-            this.IsSecure = isSecureAttribute == null ? false : Convert.ToBoolean(isSecureAttribute.Value, CultureInfo.InvariantCulture);
+            this.IsSecure = isSecureAttribute == null ? null : new Nullable<bool>(Convert.ToBoolean(isSecureAttribute.Value, CultureInfo.InvariantCulture));
+
+            // This tells us whether to provide an interface to Entity Framework or not.
+            XAttribute isVolatileAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsVolatileName);
+            this.IsVolatile = isVolatileAttribute == null ? null : new Nullable<bool>(Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture));
 
             // The data model description is found on the first element of the first complex type in the module.
             XElement complexTypeElement = rootElement.Element(XmlSchemaDocument.ComplexTypeName);
@@ -169,6 +173,11 @@ namespace GammaFour.XmlSchemaDocument
         public static XName DeleteRuleName { get; } = XName.Get("deleteRule", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
+        /// Gets the Domain attribute.
+        /// </summary>
+        public static XName DomainName { get; } = XName.Get("domain", XmlSchemaDocument.GammaFourDataNamespace);
+
+        /// <summary>
         /// Gets the Element element.
         /// </summary>
         public static XName ElementName { get; } = XName.Get("element", XmlSchemaDocument.XmlSchemaNamespace);
@@ -279,6 +288,11 @@ namespace GammaFour.XmlSchemaDocument
         public static XName XPathName { get; } = XName.Get("xpath", string.Empty);
 
         /// <summary>
+        /// Gets a value describing the data domain used by the REST genarator.
+        /// </summary>
+        public string Domain { get; private set; }
+
+        /// <summary>
         /// Gets the constraint elements.
         /// </summary>
         public List<ForeignKeyElement> ForeignKeys
@@ -293,12 +307,12 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets a value indicating whether the data model supports a persistent Entity Framework store.
         /// </summary>
-        public bool IsVolatile { get; private set; }
+        public bool? IsVolatile { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether the generated controllers require authentication.
         /// </summary>
-        public bool IsSecure { get; private set; }
+        public bool? IsSecure { get; private set; }
 
         /// <summary>
         /// Gets the name of the data model.

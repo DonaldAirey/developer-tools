@@ -122,16 +122,22 @@ namespace GammaFour.DeveloperTools
                         //  <xs:element name="Domain">
                         XElement dataModelElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", xmlSchemaDocument.Name));
 
-                        //  This flag indicates that the API uses tokens for authentication.
-                        if (xmlSchemaDocument.IsSecure)
+                        //  This specifies the data domain used by the REST generated code.
+                        if (xmlSchemaDocument.Domain != null)
                         {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, true);
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.DomainName, xmlSchemaDocument.Domain);
+                        }
+
+                        //  This flag indicates that the API uses tokens for authentication.
+                        if (xmlSchemaDocument.IsSecure.HasValue)
+                        {
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure.Value);
                         }
 
                         //  This flag indicates that the interface is not committed to a peristent store.
-                        if (xmlSchemaDocument.IsVolatile)
+                        if (xmlSchemaDocument.IsVolatile.HasValue)
                         {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, true);
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, xmlSchemaDocument.IsVolatile.Value);
                         }
 
                         //    <xs:complexType>
