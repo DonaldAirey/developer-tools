@@ -1,9 +1,10 @@
 ﻿// <copyright file="Conversions.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.XmlSchemaDocument
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
@@ -17,7 +18,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Maps the CLR full type name to a predefined type syntax.
         /// </summary>
-        private static Dictionary<string, TypeSyntax> predefinedTypes = new Dictionary<string, TypeSyntax>()
+        private static readonly Dictionary<string, TypeSyntax> PredefinedTypes = new Dictionary<string, TypeSyntax>()
         {
             { "System.Boolean", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.BoolKeyword)) },
             { "System.Byte", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ByteKeyword)) },
@@ -28,6 +29,10 @@ namespace GammaFour.XmlSchemaDocument
             { "System.Int64", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.LongKeyword)) },
             { "System.Object", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ObjectKeyword)) },
             { "System.String", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.StringKeyword)) },
+            { "System.Float", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.FloatKeyword)) },
+            { "System.UInt16", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.UShortKeyword)) },
+            { "System.UInt32", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.UIntKeyword)) },
+            { "System.UInt64", SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.ULongKeyword)) },
         };
 
         /// <summary>
@@ -37,10 +42,16 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>A Roslyn type syntax corresponding to the CLR type.</returns>
         public static TypeSyntax FromType(ColumnType columnType)
         {
+            // Validate the parameter
+            if (columnType == null)
+            {
+                throw new ArgumentNullException(nameof(columnType));
+            }
+
             if (columnType.IsNullable && columnType.IsValueType)
             {
                 TypeSyntax nullableTypeSyntax = null;
-                if (!Conversions.predefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
+                if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
                 {
                     nullableTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
@@ -51,7 +62,7 @@ namespace GammaFour.XmlSchemaDocument
             if (columnType.IsArray)
             {
                 TypeSyntax arrayTypeSyntax = null;
-                if (!Conversions.predefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
+                if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
                 {
                     arrayTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
@@ -66,7 +77,7 @@ namespace GammaFour.XmlSchemaDocument
             }
 
             TypeSyntax typeSyntax = null;
-            if (!Conversions.predefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
+            if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
             {
                 typeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
             }

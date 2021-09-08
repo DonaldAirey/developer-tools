@@ -1,5 +1,5 @@
 ﻿// <copyright file="ColumnElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.XmlSchemaDocument
@@ -19,29 +19,37 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Maps the full name of the type to a function that parses a default value for that type.
         /// </summary>
-        private static Dictionary<string, Func<string, object>> conversionFunctions = new Dictionary<string, Func<string, object>>
+        private static readonly Dictionary<string, Func<string, object>> ConversionFunctions = new Dictionary<string, Func<string, object>>
         {
             { "System.Boolean", (v) => bool.Parse(v) },
             { "System.DateTime", (v) => DateTime.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Decimal", (v) => decimal.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Double", (v) => double.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Guid", (v) => Guid.Parse(v) },
+            { "System.Int16", (v) => short.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Int32", (v) => int.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Int64", (v) => long.Parse(v, CultureInfo.InvariantCulture) },
             { "System.Single", (v) => float.Parse(v, CultureInfo.InvariantCulture) },
-            { "System.Int16", (v) => short.Parse(v, CultureInfo.InvariantCulture) },
             { "System.String", (v) => v },
+            { "System.UInt16", (v) => ushort.Parse(v, CultureInfo.InvariantCulture) },
+            { "System.UInt32", (v) => uint.Parse(v, CultureInfo.InvariantCulture) },
+            { "System.UInt64", (v) => ulong.Parse(v, CultureInfo.InvariantCulture) },
         };
 
         /// <summary>
         /// The type for this column.
         /// </summary>
-        private ColumnType columnType = new ColumnType();
+        private readonly ColumnType columnType = new ColumnType();
 
         /// <summary>
         /// The default, if any, for this column.
         /// </summary>
         private object defaultValue;
+
+        /// <summary>
+        /// The number of fractional digits in a fix-precision number.
+        /// </summary>
+        private int fractionDigits = 2;
 
         /// <summary>
         /// Indicates that the column has a default value.
@@ -61,7 +69,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Indicates that the type information has been initialized.
         /// </summary>
-        private bool isTypeInfoInitialized = false;
+        private bool isTypeInfoInitialized;
 
         /// <summary>
         /// A value indicating whether the column is part of a parent primary key.
@@ -72,6 +80,11 @@ namespace GammaFour.XmlSchemaDocument
         /// The maximum length of a variable length data type.
         /// </summary>
         private int maximumLength;
+
+        /// <summary>
+        /// The total number of digits in a fixed-precision datatype.
+        /// </summary>
+        private int totalDigits = 18;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColumnElement"/> class.
@@ -132,6 +145,23 @@ namespace GammaFour.XmlSchemaDocument
         }
 
         /// <summary>
+        /// Gets the number of fractional digits in a fixed-precision number.
+        /// </summary>
+        public int FractionDigits
+        {
+            get
+            {
+                // Make sure the type information has been extracted.
+                if (!this.isTypeInfoInitialized)
+                {
+                    this.InitializeTypeInfo();
+                }
+
+                return this.fractionDigits;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether gets an indication whether the column has a default value.
         /// </summary>
         public bool HasDefault
@@ -177,7 +207,7 @@ namespace GammaFour.XmlSchemaDocument
             get
             {
                 // This will examine the primary key to see if the column is part of the key.
-                if (this.isPrimaryKey.HasValue)
+                if (!this.isPrimaryKey.HasValue)
                 {
                     this.isPrimaryKey = (from ce in this.Table.PrimaryKey.Columns
                                          where ce.Column == this
@@ -248,6 +278,23 @@ namespace GammaFour.XmlSchemaDocument
             get
             {
                 return this.Parent.Parent.Parent as TableElement;
+            }
+        }
+
+        /// <summary>
+        /// Gets the total digits in a fixed-precision number.
+        /// </summary>
+        public int TotalDigits
+        {
+            get
+            {
+                // Make sure the type information has been extracted.
+                if (!this.isTypeInfoInitialized)
+                {
+                    this.InitializeTypeInfo();
+                }
+
+                return this.totalDigits;
             }
         }
 
@@ -393,6 +440,12 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>A value that indicates the relative order of the objects being compared.</returns>
         public int CompareTo(ColumnElement other)
         {
+            // Validate the parameter
+            if (other == null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
             return string.Compare(this.Name, other.Name, StringComparison.InvariantCulture);
         }
 
@@ -432,9 +485,26 @@ namespace GammaFour.XmlSchemaDocument
                 this.columnType.IsPredefined = true;
                 this.columnType.IsValueType = type.GetTypeInfo().IsValueType;
 
+                // Extract the number of fractional digits in a fixed precision number.
+                XElement fractionDigitsElement = restrictionElement.Element(XmlSchemaDocument.FractionDigitsName);
+                if (fractionDigitsElement != null)
+                {
+                    this.fractionDigits = Convert.ToInt32(fractionDigitsElement.Attribute(XmlSchemaDocument.ValueName).Value, CultureInfo.InvariantCulture);
+                }
+
                 // Extract the maximum length for this column's data.
                 XElement maxLengthElement = restrictionElement.Element(XmlSchemaDocument.MaxLengthName);
-                this.maximumLength = Convert.ToInt32(maxLengthElement.Attribute(XmlSchemaDocument.ValueName).Value, CultureInfo.InvariantCulture);
+                if (maxLengthElement != null)
+                {
+                    this.maximumLength = Convert.ToInt32(maxLengthElement.Attribute(XmlSchemaDocument.ValueName).Value, CultureInfo.InvariantCulture);
+                }
+
+                // Extract the total number of digits in a fixed precision number.
+                XElement totalDigitsElement = restrictionElement.Element(XmlSchemaDocument.TotalDigitsName);
+                if (totalDigitsElement != null)
+                {
+                    this.totalDigits = Convert.ToInt32(totalDigitsElement.Attribute(XmlSchemaDocument.ValueName).Value, CultureInfo.InvariantCulture);
+                }
             }
             else
             {
@@ -466,7 +536,7 @@ namespace GammaFour.XmlSchemaDocument
             XAttribute defaultAttribute = this.Attribute(XmlSchemaDocument.DefaultName);
             this.hasDefault = defaultAttribute != null;
             Func<string, object> defaultFunction = null;
-            if (defaultAttribute != null && ColumnElement.conversionFunctions.TryGetValue(this.columnType.FullName, out defaultFunction))
+            if (defaultAttribute != null && ColumnElement.ConversionFunctions.TryGetValue(this.columnType.FullName, out defaultFunction))
             {
                 this.defaultValue = defaultFunction(defaultAttribute.Value);
             }

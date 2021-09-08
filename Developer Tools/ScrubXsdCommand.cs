@@ -128,16 +128,10 @@ namespace GammaFour.DeveloperTools
                             dataModelElement.SetAttributeValue(XmlSchemaDocument.DomainName, xmlSchemaDocument.Domain);
                         }
 
-                        //  This flag indicates that the API uses tokens for authentication.
-                        if (xmlSchemaDocument.IsSecure.HasValue)
+                        //  This flag indicates that the API uses tokens for authentication.  This attribute should be preserved.
+                        if (xmlSchemaDocument.IsSecure)
                         {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure.Value);
-                        }
-
-                        //  This flag indicates that the interface is not committed to a peristent store.
-                        if (xmlSchemaDocument.IsVolatile.HasValue)
-                        {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, xmlSchemaDocument.IsVolatile.Value);
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure);
                         }
 
                         //    <xs:complexType>

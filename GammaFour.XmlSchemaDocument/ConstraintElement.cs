@@ -1,5 +1,5 @@
 ﻿// <copyright file="ConstraintElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.XmlSchemaDocument
@@ -18,7 +18,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Used to parse the XPath specification from constraints.
         /// </summary>
-        private static Regex xPath = new Regex(@"(\.//)?(\w+:)?(\w+)");
+        private static readonly Regex XPath = new Regex(@"(\.//)?(\w+:)?(\w+)");
 
         /// <summary>
         /// The columns in this constraint.
@@ -112,12 +112,10 @@ namespace GammaFour.XmlSchemaDocument
         {
             get
             {
-                if (this.isNullable.HasValue)
+                if (!this.isNullable.HasValue)
                 {
-                    // If all the columns of a given constraint can contain null, then the constraint is nullable.
-                    this.isNullable = (from cre in this.Columns
-                                       where cre.Column.ColumnType.IsNullable
-                                       select cre).Count() == this.Columns.Count();
+                    // If any of the columns of a given constraint can contain null, then the constraint is nullable.
+                    this.isNullable = this.Columns.Select(cre => cre).Where(cre => cre.Column.ColumnType.IsNullable).Any();
                 }
 
                 return this.isNullable.Value;
@@ -143,7 +141,7 @@ namespace GammaFour.XmlSchemaDocument
                     // specification, but we can pull it apart to get the table name for which this constraint is intended.
                     XElement selectorElement = this.Element(XmlSchemaDocument.SelectorName);
                     XAttribute xPathAttribute = selectorElement.Attribute(XmlSchemaDocument.XPathName);
-                    Match match = ConstraintElement.xPath.Match(xPathAttribute.Value);
+                    Match match = ConstraintElement.XPath.Match(xPathAttribute.Value);
                     if (!match.Success)
                     {
                         throw new InvalidOperationException($"Unique Constraint {this.Name} can't parse expression '{xPathAttribute.Value}'");
@@ -151,8 +149,8 @@ namespace GammaFour.XmlSchemaDocument
 
                     // Select the table from the name in the XPath specification.
                     this.tableElement = (from te in this.XmlSchemaDocument.Tables
-                                        where te.Name == match.Groups[match.Groups.Count - 1].Value
-                                        select te).FirstOrDefault();
+                                         where te.Name == match.Groups[match.Groups.Count - 1].Value
+                                         select te).FirstOrDefault();
                     if (this.tableElement == null)
                     {
                         throw new InvalidOperationException($"Constraint {this.Name} can't find referenced table {match.Groups[match.Groups.Count - 1]}");
@@ -288,6 +286,12 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>A value that indicates the relative order of the objects being compared.</returns>
         public int CompareTo(ConstraintElement other)
         {
+            // Validate the parameter
+            if (other == null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
             return string.Compare(this.Name, other.Name, StringComparison.InvariantCulture);
         }
 

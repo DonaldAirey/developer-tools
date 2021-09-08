@@ -1,5 +1,5 @@
 ﻿// <copyright file="ForeignKeyElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.XmlSchemaDocument
@@ -36,6 +36,12 @@ namespace GammaFour.XmlSchemaDocument
         public ForeignKeyElement(XElement xElement)
             : base(xElement)
         {
+            // Validate the parameter
+            if (xElement == null)
+            {
+                throw new ArgumentNullException(nameof(xElement));
+            }
+
             // Initialize the object.
             this.Refer = this.Attribute(XmlSchemaDocument.ReferName).Value;
 
