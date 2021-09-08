@@ -1,11 +1,12 @@
 ﻿// <copyright file="TableElement.cs" company="Gamma Four, Inc.">
-//     Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//     Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.XmlSchemaDocument
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Xml.Linq;
 
@@ -63,6 +64,10 @@ namespace GammaFour.XmlSchemaDocument
         {
             // Extract the name from the schema.
             this.Name = this.Attribute(XmlSchemaDocument.ObjectName).Value;
+
+            // This tells us whether the table is persisted in a database or not.
+            XAttribute isVolatileAttribute = this.Attribute(XmlSchemaDocument.IsVolatileName);
+            this.IsVolatile = isVolatileAttribute == null ? false : Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture);
 
             // The verbs tell us what actions to support in the controller when it's built.
             XAttribute verbAttribute = this.Attribute(XmlSchemaDocument.VerbsName);
@@ -151,7 +156,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets a value indicating whether the table supports write-through operations to a persistent store.
         /// </summary>
-        public bool IsVolatile { get; private set; } = true;
+        public bool IsVolatile { get; private set; }
 
         /// <summary>
         /// Gets the name of the table.
@@ -380,12 +385,6 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>A value that indicates the relative order of the objects being compared.</returns>
         public int CompareTo(TableElement other)
         {
-            // Validate the parameter
-            if (other == null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
             return string.Compare(this.Name, other.Name, StringComparison.InvariantCulture);
         }
 

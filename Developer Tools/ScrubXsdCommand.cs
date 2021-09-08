@@ -128,10 +128,16 @@ namespace GammaFour.DeveloperTools
                             dataModelElement.SetAttributeValue(XmlSchemaDocument.DomainName, xmlSchemaDocument.Domain);
                         }
 
-                        //  This flag indicates that the API uses tokens for authentication.  This attribute should be preserved.
-                        if (xmlSchemaDocument.IsSecure)
+                        //  This flag indicates that the API uses tokens for authentication.
+                        if (xmlSchemaDocument.IsSecure.HasValue)
                         {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure);
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure.Value);
+                        }
+
+                        //  This flag indicates that the interface is not committed to a peristent store.
+                        if (xmlSchemaDocument.IsVolatile.HasValue)
+                        {
+                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, xmlSchemaDocument.IsVolatile.Value);
                         }
 
                         //    <xs:complexType>
@@ -339,22 +345,41 @@ namespace GammaFour.DeveloperTools
             }
 
             // Emit the column's type.
-            if (columnElement.MaximumLength == int.MaxValue)
+            if (!columnElement.HasSimpleType)
             {
                 xElement.Add(new XAttribute("type", xmlType));
             }
             else
             {
-                //                <xs:simpleType>
-                //                  <xs:restriction base="xs:string">
-                //                    <xs:maxLength value="128" />
-                //                  </xs:restriction>
-                //                </xs:simpleType>
-                XElement restrictionElement = new XElement(
-                    ScrubXsdCommand.xs + "restriction",
-                    new XAttribute("base", xmlType),
-                    new XElement(ScrubXsdCommand.xs + "maxLength", new XAttribute("value", columnElement.MaximumLength)));
-                xElement.Add(new XElement(ScrubXsdCommand.xs + "simpleType", restrictionElement));
+                if (columnElement.ColumnType.FullName == typeof(string).FullName)
+                {
+                    //                <xs:simpleType>
+                    //                  <xs:restriction base="xs:string">
+                    //                    <xs:maxLength value="128" />
+                    //                  </xs:restriction>
+                    //                </xs:simpleType>
+                    XElement restrictionElement = new XElement(
+                        ScrubXsdCommand.xs + "restriction",
+                        new XAttribute("base", xmlType),
+                        new XElement(ScrubXsdCommand.xs + "maxLength", new XAttribute("value", columnElement.MaximumLength)));
+                    xElement.Add(new XElement(ScrubXsdCommand.xs + "simpleType", restrictionElement));
+                }
+
+                if (columnElement.ColumnType.FullName == typeof(decimal).FullName)
+                {
+                    //                <xs:simpleType>
+                    //                  <xs:restriction base="xs:decimal">
+                    //                    <xs:fractionDigits value="6" />
+                    //                    <xs:totalDigits value="18" />
+                    //                  </xs:restriction>
+                    //                </xs:simpleType>
+                    XElement restrictionElement = new XElement(
+                        ScrubXsdCommand.xs + "restriction",
+                        new XAttribute("base", xmlType),
+                        new XElement(ScrubXsdCommand.xs + "fractionDigits", new XAttribute("value", columnElement.FractionDigits)),
+                        new XElement(ScrubXsdCommand.xs + "totalDigits", new XAttribute("value", columnElement.TotalDigits)));
+                    xElement.Add(new XElement(ScrubXsdCommand.xs + "simpleType", restrictionElement));
+                }
             }
 
             // An optional column is identified with a 'minOccurs=0' attribute.
