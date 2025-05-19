@@ -166,9 +166,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GammaFour.XmlSchemaDocument\GammaFour.XmlSchemaDocument.csproj">
-      <Project>{57b45902-f8fa-4781-80e4-e099fd0d7826}</Project>
-      <Name>GammaFour.XmlSchemaDocument</Name>
+    <ProjectReference Include="..\GammaFour.DataModelGenerator.Common\GammaFour.DataModelGenerator.Common.csproj">
+      <Project>{4e913d07-cc74-309a-ce5f-355426ab8eed}</Project>
+      <Name>GammaFour.DataModelGenerator.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

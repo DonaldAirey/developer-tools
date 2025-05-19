@@ -1,10 +1,9 @@
 ﻿// <copyright file="StringExtensions.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
-    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using Pluralize.NET;
@@ -38,14 +37,8 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>The input string with a lower case starting letter.</returns>
         public static string ToCamelCase(this string text)
         {
-            // Validate the parameter
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
             // Convert the variable to its camel case equivalent.
-            return text[0].ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture) + text.Remove(0, 1);
+            return text.Substring(0, 1).ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture) + text.Remove(0, 1);
         }
 
         /// <summary>
@@ -55,14 +48,14 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>The input string with a lower case starting letter and an @ prepended if the variable is a keyword..</returns>
         public static string ToVariableName(this string text)
         {
-            // Validate the parameter
-            if (text == null)
+            // Value is a special case.
+            if (text == "Value")
             {
-                throw new ArgumentNullException(nameof(text));
+                return "localValue";
             }
 
             // Convert the variable to its camel case equivalent.
-            var name = text[0].ToString(CultureInfo.InvariantCulture).ToLower(CultureInfo.InvariantCulture) + text.Remove(0, 1);
+            var name = text.Substring(0, 1).ToLower(CultureInfo.InvariantCulture) + text.Remove(0, 1);
             return StringExtensions.Keywords.Contains(name) ? "@" + name : name;
         }
 

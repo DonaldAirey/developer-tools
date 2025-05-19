@@ -4,20 +4,22 @@
 // <author>Donald Roy Airey</author>
 namespace GammaFour.DeveloperTools
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Design;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
-    using System.Xml.Linq;
     using EnvDTE;
     using EnvDTE80;
-    using GammaFour.XmlSchemaDocument;
+    using GammaFour.DataModelGenerator.Common;
     using GammaFour.DeveloperTools.Properties;
     using Microsoft;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel.Design;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Xml;
+    using System.Xml.Linq;
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
@@ -93,7 +95,7 @@ namespace GammaFour.DeveloperTools
         private static string ScrubDocument(string source, string extension)
         {
             // Used to write the final document in the form of a long string.
-            using (Utf8StringWriter stringWriter = new Utf8StringWriter())
+            using (StringWriter stringWriter = new StringWriter(CultureInfo.InvariantCulture))
             {
                 try
                 {
@@ -122,24 +124,6 @@ namespace GammaFour.DeveloperTools
                         //  <xs:element name="Domain">
                         XElement dataModelElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", xmlSchemaDocument.Name));
 
-                        //  This specifies the data domain used by the REST generated code.
-                        if (xmlSchemaDocument.Domain != null)
-                        {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.DomainName, xmlSchemaDocument.Domain);
-                        }
-
-                        //  This flag indicates that the API uses tokens for authentication.
-                        if (xmlSchemaDocument.IsSecure.HasValue)
-                        {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsSecureName, xmlSchemaDocument.IsSecure.Value);
-                        }
-
-                        //  This flag indicates that the interface is not committed to a peristent store.
-                        if (xmlSchemaDocument.IsVolatile.HasValue)
-                        {
-                            dataModelElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, xmlSchemaDocument.IsVolatile.Value);
-                        }
-
                         //    <xs:complexType>
                         XElement dataModelComlexTypeElement = new XElement(ScrubXsdCommand.xs + "complexType");
 
@@ -157,25 +141,25 @@ namespace GammaFour.DeveloperTools
                         dataModelElement.Add(dataModelComlexTypeElement);
 
                         // This will order the primary keys.
-                        List<UniqueKeyElement> primaryKeyList = new List<UniqueKeyElement>();
+                        List<UniqueIndexElement> primaryKeyList = new List<UniqueIndexElement>();
                         foreach (TableElement tableElement in xmlSchemaDocument.Tables)
                         {
-                            primaryKeyList.AddRange(tableElement.UniqueKeys);
+                            primaryKeyList.AddRange(tableElement.UniqueIndexes);
                         }
 
-                        foreach (UniqueKeyElement uniqueConstraintSchema in primaryKeyList.OrderBy(pke => pke.Name))
+                        foreach (UniqueIndexElement uniqueIndexElement in primaryKeyList.OrderBy(pke => pke.Name))
                         {
-                            dataModelElement.Add(CreateUniqueKey(uniqueConstraintSchema));
+                            dataModelElement.Add(CreateUniqueKey(uniqueIndexElement));
                         }
 
                         // This will order the foreign primary keys.
-                        List<ForeignKeyElement> foreignKeyList = new List<ForeignKeyElement>();
+                        List<ForeignIndexElement> foreignIndexElements = new List<ForeignIndexElement>();
                         foreach (TableElement tableElement in xmlSchemaDocument.Tables)
                         {
-                            foreignKeyList.AddRange(tableElement.ForeignKeys);
+                            foreignIndexElements.AddRange(tableElement.ForeignIndexes);
                         }
 
-                        foreach (ForeignKeyElement foreignConstraintSchema in foreignKeyList.OrderBy(fke => fke.Name))
+                        foreach (ForeignIndexElement foreignConstraintSchema in foreignIndexElements.OrderBy(fke => fke.Name))
                         {
                             dataModelElement.Add(CreateForeignKey(foreignConstraintSchema));
                         }
@@ -183,8 +167,11 @@ namespace GammaFour.DeveloperTools
                         // Add the data model element to the document.
                         schemaElement.Add(dataModelElement);
 
-                        // Save the regurgitated output.
-                        targetDocument.Save(stringWriter);
+                        // Beautify and save the target document when it has been ordered.
+                        XmlWriterSettings xmlWriterSettings = new XmlWriterSettings { Indent = true, IndentChars = "\t" };
+                        XmlWriter xmlWriter = XmlWriter.Create(stringWriter, xmlWriterSettings);
+                        targetDocument.WriteTo(xmlWriter);
+                        xmlWriter.Close();
                     }
                 }
                 catch (Exception exception)
@@ -214,29 +201,6 @@ namespace GammaFour.DeveloperTools
         {
             //        <xs:element name="Account">
             XElement xElement = new XElement(ScrubXsdCommand.xs + "element", new XAttribute("name", tableElement.Name));
-
-            // gfdata:isVolatile="true"
-            if (tableElement.IsVolatile)
-            {
-                xElement.SetAttributeValue(XmlSchemaDocument.IsVolatileName, true);
-            }
-
-            // gfdata:verbs="Delete,Get,Put"
-            string verbs = string.Empty;
-            foreach (Verb verb in tableElement.Verbs)
-            {
-                if (!string.IsNullOrEmpty(verbs))
-                {
-                    verbs += ",";
-                }
-
-                verbs += verb.ToString();
-            }
-
-            if (!string.IsNullOrEmpty(verbs))
-            {
-                xElement.Add(new XAttribute(XmlSchemaDocument.VerbsName, verbs));
-            }
 
             //           <xs:complexType>
             XElement complexTypeElement = new XElement(ScrubXsdCommand.xs + "complexType");
@@ -338,12 +302,6 @@ namespace GammaFour.DeveloperTools
                 xElement.Add(new XAttribute(XmlSchemaDocument.DataTypeName, dataType));
             }
 
-            // This attribute controls whether the column is autoincremented by the database server.
-            if (columnElement.IsAutoIncrement)
-            {
-                xElement.Add(new XAttribute(XmlSchemaDocument.AutoIncrementName, true));
-            }
-
             // Emit the column's type.
             if (!columnElement.HasSimpleType)
             {
@@ -401,9 +359,9 @@ namespace GammaFour.DeveloperTools
         /// <summary>
         /// Creates the element that describes a unique constraint.
         /// </summary>
-        /// <param name="uniqueConstraintSchema">A description of a unique constraint.</param>
+        /// <param name="uniqueIndexElement">A description of a unique constraint.</param>
         /// <returns>An element that can be used in an XML Schema document to describe a unique constraint.</returns>
-        private static XElement CreateUniqueKey(UniqueKeyElement uniqueConstraintSchema)
+        private static XElement CreateUniqueKey(UniqueIndexElement uniqueIndexElement)
         {
             //    <xs:unique name="AccessControlKey" msdata:PrimaryKey="true">
             //      <xs:selector xpath=".//mstns:AccessControl" />
@@ -412,19 +370,19 @@ namespace GammaFour.DeveloperTools
             //    </xs:unique>
             XElement uniqueElement = new XElement(
                 ScrubXsdCommand.xs + "unique",
-                new XAttribute("name", uniqueConstraintSchema.Name));
+                new XAttribute("name", uniqueIndexElement.Name));
 
-            if (uniqueConstraintSchema.IsPrimaryKey)
+            if (uniqueIndexElement.IsPrimaryIndex)
             {
-                uniqueElement.Add(new XAttribute(XmlSchemaDocument.IsPrimaryKeyName, true));
+                uniqueElement.Add(new XAttribute(XmlSchemaDocument.IsPrimaryIndexName, true));
             }
 
             uniqueElement.Add(
                 new XElement(
                     ScrubXsdCommand.xs + "selector",
-                    new XAttribute("xpath", string.Format(".//mstns:{0}", uniqueConstraintSchema.Table.Name))));
+                    new XAttribute("xpath", string.Format(".//mstns:{0}", uniqueIndexElement.Table.Name))));
 
-            foreach (ColumnReferenceElement columnReferenceElement in uniqueConstraintSchema.Columns.OrderBy(c => c.Name))
+            foreach (ColumnReferenceElement columnReferenceElement in uniqueIndexElement.Columns.OrderBy(c => c.Name))
             {
                 ColumnElement columnElement = columnReferenceElement.Column;
                 uniqueElement.Add(
@@ -440,9 +398,9 @@ namespace GammaFour.DeveloperTools
         /// <summary>
         /// Creates the element that describes a foreign constraint.
         /// </summary>
-        /// <param name="foreignKeyElement">A description of a foreign constraint.</param>
+        /// <param name="foreignIndexElement">A description of a foreign constraint.</param>
         /// <returns>An element that can be used in an XML Schema document to describe a foreign constraint.</returns>
-        private static XElement CreateForeignKey(ForeignKeyElement foreignKeyElement)
+        private static XElement CreateForeignKey(ForeignIndexElement foreignIndexElement)
         {
             //    <xs:keyref name="FK_Entity_AccessControl" refer="EntityKey" msprop:rel_Generator_UserRelationName="FK_Entity_AccessControl"
             //        msprop:rel_Generator_RelationVarName="relationFK_Entity_AccessControl" msprop:rel_Generator_UserChildTable="AccessControl"
@@ -453,15 +411,15 @@ namespace GammaFour.DeveloperTools
             //    </xs:keyref>
             XElement foreignElement = new XElement(
                     ScrubXsdCommand.xs + "keyref",
-                    new XAttribute("name", foreignKeyElement.Name),
-                    new XAttribute("refer", foreignKeyElement.UniqueKey.Name));
+                    new XAttribute("name", foreignIndexElement.Name),
+                    new XAttribute("refer", foreignIndexElement.UniqueIndex.Name));
 
             foreignElement.Add(
                 new XElement(
                     ScrubXsdCommand.xs + "selector",
-                    new XAttribute("xpath", string.Format(".//mstns:{0}", foreignKeyElement.Table.Name))));
+                    new XAttribute("xpath", string.Format(".//mstns:{0}", foreignIndexElement.Table.Name))));
 
-            foreach (ColumnReferenceElement columnReferenceElement in foreignKeyElement.Columns.OrderBy(c => c.Name))
+            foreach (ColumnReferenceElement columnReferenceElement in foreignIndexElement.Columns.OrderBy(c => c.Name))
             {
                 ColumnElement columnElement = columnReferenceElement.Column;
                 foreignElement.Add(
@@ -512,17 +470,6 @@ namespace GammaFour.DeveloperTools
                 // There will likely be some dramatic changes to the format of the document.  This will restore the cursor to where it was in the
                 // document before we beautified it.
                 selection.MoveToLineAndOffset(line, offset);
-            }
-        }
-
-        /// <summary>
-        /// A class to force the XML encoding to be UTF-8.
-        /// </summary>
-        private class Utf8StringWriter : StringWriter
-        {
-            public override Encoding Encoding
-            {
-                get { return Encoding.UTF8; }
             }
         }
     }

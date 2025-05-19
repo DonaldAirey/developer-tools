@@ -1,8 +1,8 @@
 ﻿// <copyright file="ColumnElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Collections.Generic;
@@ -64,7 +64,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// A value indicating whether ths column is part of the primary key.
         /// </summary>
-        private bool? isPrimaryKey;
+        private bool? isPrimaryIndex;
 
         /// <summary>
         /// Indicates that the type information has been initialized.
@@ -108,29 +108,7 @@ namespace GammaFour.XmlSchemaDocument
             // This determines if the column allows nulls.
             XAttribute minOccursAttribute = this.Attribute(XmlSchemaDocument.MinOccursName);
             this.columnType.IsNullable = minOccursAttribute == null ? false : Convert.ToInt32(minOccursAttribute.Value, CultureInfo.InvariantCulture) == 0;
-
-            // Determine the IsIdentityColumn property.
-            XAttribute autoIncrementAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementName);
-            this.IsAutoIncrement = autoIncrementAttribute == null ? false : Convert.ToBoolean(autoIncrementAttribute.Value, CultureInfo.InvariantCulture);
-
-            // Determine the AutoIncrementSeed property.
-            XAttribute autoIncrementSeedAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementSeedName);
-            this.AutoIncrementSeed = autoIncrementSeedAttribute == null ? 0 : Convert.ToInt32(autoIncrementSeedAttribute.Value, CultureInfo.InvariantCulture);
-
-            // Determine the AutoIncrementStop property
-            XAttribute autoIncrementStepAttribute = this.Attribute(XmlSchemaDocument.AutoIncrementStepName);
-            this.AutoIncrementStep = autoIncrementStepAttribute == null ? 1 : Convert.ToInt32(autoIncrementStepAttribute.Value, CultureInfo.InvariantCulture);
         }
-
-        /// <summary>
-        /// Gets a value used to see an auto incrementing column.
-        /// </summary>
-        public int AutoIncrementSeed { get; private set; }
-
-        /// <summary>
-        /// Gets the value used to increment the seed value for an auto-incrementing column.
-        /// </summary>
-        public int AutoIncrementStep { get; private set; }
 
         /// <summary>
         /// Gets the default value for a column.
@@ -200,26 +178,21 @@ namespace GammaFour.XmlSchemaDocument
         }
 
         /// <summary>
-        /// Gets a value indicating whether gets an indication of whether the column increments automatically as new rows are created.
-        /// </summary>
-        public bool IsAutoIncrement { get; private set; }
-
-        /// <summary>
         /// Gets a value indicating whether the column is part of a primary key.
         /// </summary>
-        public bool IsPrimaryKey
+        public bool IsPrimaryIndex
         {
             get
             {
                 // This will examine the primary key to see if the column is part of the key.
-                if (!this.isPrimaryKey.HasValue)
+                if (!this.isPrimaryIndex.HasValue)
                 {
-                    this.isPrimaryKey = (from ce in this.Table.PrimaryKey.Columns
+                    this.isPrimaryIndex = (from ce in this.Table.PrimaryIndex.Columns
                                          where ce.Column == this
                                          select ce).Any();
                 }
 
-                return this.isPrimaryKey.Value;
+                return this.isPrimaryIndex.Value;
             }
         }
 
@@ -233,12 +206,12 @@ namespace GammaFour.XmlSchemaDocument
                 if (!this.isInParentKey.HasValue)
                 {
                     // Examine each of the parent relations to see if the column is used.
-                    var list = from fke in this.Table.ParentKeys
+                    var list = from fke in this.Table.ParentIndexes
                                from ce in fke.Columns
                                where ce.Column == this
                                select ce;
 
-                    this.isInParentKey = (from fke in this.Table.ParentKeys
+                    this.isInParentKey = (from fke in this.Table.ParentIndexes
                                           from ce in fke.Columns
                                           where ce.Column == this
                                           select ce).Any();
@@ -254,7 +227,7 @@ namespace GammaFour.XmlSchemaDocument
         public bool IsRowVersion { get; private set; }
 
         /// <summary>
-        /// Gets the maximum length of the data in a column.
+        /// Gets a value indicating whether the element has a simple type description.
         /// </summary>
         public bool HasSimpleType
         {
@@ -410,7 +383,7 @@ namespace GammaFour.XmlSchemaDocument
         }
 
         /// <summary>
-        /// Compares two <see cref="ColumnElement"/> records.
+        /// Compares two <see cref="ColumnElement"/> rows.
         /// </summary>
         /// <param name="left">The left operand.</param>
         /// <param name="right">The right operand.</param>
@@ -462,12 +435,6 @@ namespace GammaFour.XmlSchemaDocument
         /// <returns>A value that indicates the relative order of the objects being compared.</returns>
         public int CompareTo(ColumnElement other)
         {
-            // Validate the parameter
-            if (other == null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
             return string.Compare(this.Name, other.Name, StringComparison.InvariantCulture);
         }
 

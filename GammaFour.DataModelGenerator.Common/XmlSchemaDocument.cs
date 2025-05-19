@@ -1,13 +1,15 @@
 ﻿// <copyright file="XmlSchemaDocument.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
+    using System.Text.Json;
     using System.Xml.Linq;
 
     /// <summary>
@@ -39,17 +41,39 @@ namespace GammaFour.XmlSchemaDocument
             this.Name = this.Root.Element(XmlSchemaDocument.ElementName).Attribute("name").Value;
             this.TargetNamespace = this.Root.Attribute("targetNamespace").Value;
 
-            // This specifies the data domain used by the REST generated code.
-            XAttribute domainAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.DomainName);
-            this.Domain = domainAttribute == null ? null : domainAttribute.Value;
-
-            // This tells us whether the generated controllers should require authorization.
-            XAttribute isSecureAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsSecureName);
-            this.IsSecure = isSecureAttribute == null ? null : new bool?(Convert.ToBoolean(isSecureAttribute.Value, CultureInfo.InvariantCulture));
+            // This tells us where the data dataModel when compiling the REST API.
+            XAttribute usingAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.UsingName);
+            if (usingAttribute != null)
+            {
+                this.UsingNamespaces.AddRange(usingAttribute.Value.Split(','));
+            }
 
             // This tells us whether to provide an interface to Entity Framework or not.
-            XAttribute isVolatileAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsVolatileName);
-            this.IsVolatile = isVolatileAttribute == null ? null : new bool?(Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture));
+            XAttribute isMasterAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsMasterName);
+            this.IsMaster = isMasterAttribute == null ? true : Convert.ToBoolean(isMasterAttribute.Value, CultureInfo.InvariantCulture);
+
+            // This tells us whether the generated model should employ relational intergity.
+            XAttribute isRelationalAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsRelationalName);
+            this.IsRelational = isRelationalAttribute == null ? true : Convert.ToBoolean(isRelationalAttribute.Value, CultureInfo.InvariantCulture);
+
+            // This tells the generator what kind of naming convension to use for JSON properties.
+            XAttribute jsonNamingPolicyAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.JsonNamingPolicyName);
+            if (jsonNamingPolicyAttribute == null)
+            {
+                // The default naming policy for JSON properties is camel case.
+                this.JsonNamingPolicy = JsonNamingPolicy.CamelCase;
+            }
+            else
+            {
+                // This will employ the specified naming policity from the System.Text.Json package when mapping JSON property names to POCO
+                // properties.
+                Type jsonNamingPolicyType = typeof(JsonNamingPolicy);
+                PropertyInfo propertyInfo = jsonNamingPolicyType.GetProperty(jsonNamingPolicyAttribute.Value);
+                if (propertyInfo != null)
+                {
+                    this.JsonNamingPolicy = propertyInfo.GetValue(null) as JsonNamingPolicy;
+                }
+            }
 
             // The data model description is found on the first element of the first complex type in the module.
             XElement complexTypeElement = rootElement.Element(XmlSchemaDocument.ComplexTypeName);
@@ -66,11 +90,11 @@ namespace GammaFour.XmlSchemaDocument
             }
 
             // This will remove all the undecorated unique keys and replace them with decorated ones.
-            List<XElement> uniqueElements = rootElement.Elements(XmlSchemaDocument.UniqueName).ToList();
-            foreach (XElement xElement in uniqueElements)
+            List<XElement> uniqueIndexElements = rootElement.Elements(XmlSchemaDocument.UniqueName).ToList();
+            foreach (XElement xElement in uniqueIndexElements)
             {
                 // This creates the unique constraints.
-                rootElement.Add(new UniqueKeyElement(xElement));
+                rootElement.Add(new UniqueIndexElement(xElement));
                 xElement.Remove();
             }
 
@@ -78,15 +102,20 @@ namespace GammaFour.XmlSchemaDocument
             List<XElement> keyRefElements = rootElement.Elements(XmlSchemaDocument.KeyrefName).ToList();
             foreach (XElement xElement in keyRefElements)
             {
-                // This will create the foreign key constraints.
-                rootElement.Add(new ForeignKeyElement(xElement));
+                // This will create the foreign key constraints if they're requested.
+                if (this.IsRelational)
+                {
+                    rootElement.Add(new ForeignIndexElement(xElement));
+                }
+
+                // Make sure we remove this node in any case.
                 xElement.Remove();
             }
 
             // Validate the document.
             foreach (TableElement tableElement in this.Tables)
             {
-                if (tableElement.PrimaryKey == null)
+                if (tableElement.PrimaryIndex == null)
                 {
                     throw new InvalidOperationException($"Table '{tableElement.Name}' must have a primary key.");
                 }
@@ -100,29 +129,9 @@ namespace GammaFour.XmlSchemaDocument
         }
 
         /// <summary>
-        /// Gets the AcceptRejectRule attribute.
-        /// </summary>
-        public static XName AcceptRejectRuleName { get; } = XName.Get("acceptRejectRule", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
         /// Gets the  indication that a custom type is specified.
         /// </summary>
         public static XName AnyTypeName { get; } = XName.Get("anyType", XmlSchemaDocument.XmlSchemaNamespace);
-
-        /// <summary>
-        /// Gets the AutoIncrement attribute.
-        /// </summary>
-        public static XName AutoIncrementName { get; } = XName.Get("autoIncrement", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
-        /// Gets the AutoIncrementSeed attribute.
-        /// </summary>
-        public static XName AutoIncrementSeedName { get; } = XName.Get("autoIncrementSeed", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
-        /// Gets the AutoIncrementStep attribute.
-        /// </summary>
-        public static XName AutoIncrementStepName { get; } = XName.Get("autoIncrementStep", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Base attribute.
@@ -140,11 +149,6 @@ namespace GammaFour.XmlSchemaDocument
         public static XName ComplexTypeName { get; } = XName.Get("complexType", XmlSchemaDocument.XmlSchemaNamespace);
 
         /// <summary>
-        /// Gets the ConstraintOnly attribute.
-        /// </summary>
-        public static XName ConstraintOnlyName { get; } = XName.Get("constraintOnly", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
         /// Gets the DataType attribute.
         /// </summary>
         public static XName DataTypeName { get; } = XName.Get("dataType", XmlSchemaDocument.GammaFourDataNamespace);
@@ -153,16 +157,6 @@ namespace GammaFour.XmlSchemaDocument
         /// Gets the Default attribute.
         /// </summary>
         public static XName DefaultName { get; } = XName.Get("default", string.Empty);
-
-        /// <summary>
-        /// Gets the DeleteRule attribute.
-        /// </summary>
-        public static XName DeleteRuleName { get; } = XName.Get("deleteRule", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
-        /// Gets the Domain attribute.
-        /// </summary>
-        public static XName DomainName { get; } = XName.Get("domain", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Element element.
@@ -180,24 +174,29 @@ namespace GammaFour.XmlSchemaDocument
         public static XName FractionDigitsName { get; } = XName.Get("fractionDigits", XmlSchemaDocument.XmlSchemaNamespace);
 
         /// <summary>
-        /// Gets the IsSecure attribute.
+        /// Gets the IsPrimaryIndex attribute.
         /// </summary>
-        public static XName IsSecureName { get; } = XName.Get("isSecure", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsPrimaryIndexName { get; } = XName.Get("isPrimaryIndex", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
-        /// Gets the IsVolatile attribute.
+        /// Gets the IsRelational attribute.
         /// </summary>
-        public static XName IsVolatileName { get; } = XName.Get("isVolatile", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsRelationalName { get; } = XName.Get("isRelational", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
-        /// Gets the IsPrimaryKey attribute.
+        /// Gets the IsMaster attribute.
         /// </summary>
-        public static XName IsPrimaryKeyName { get; } = XName.Get("isPrimaryKey", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsMasterName { get; } = XName.Get("isMaster", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the IsRowVersion attribute.
         /// </summary>
         public static XName IsRowVersionName { get; } = XName.Get("isRowVersion", XmlSchemaDocument.GammaFourDataNamespace);
+
+        /// <summary>
+        /// Gets the JsonNamingPolicy attribute.
+        /// </summary>
+        public static XName JsonNamingPolicyName { get; } = XName.Get("jsonNamingPolicy", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Keyref element.
@@ -208,11 +207,6 @@ namespace GammaFour.XmlSchemaDocument
         /// Gets the MaxLength element.
         /// </summary>
         public static XName MaxLengthName { get; } = XName.Get("maxLength", XmlSchemaDocument.XmlSchemaNamespace);
-
-        /// <summary>
-        /// Gets the MaxOccurs attribute.
-        /// </summary>
-        public static XName MaxOccursName { get; } = XName.Get("maxOccurs", XmlSchemaDocument.XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the MinOccurs attribute.
@@ -265,9 +259,9 @@ namespace GammaFour.XmlSchemaDocument
         public static XName UniqueName { get; } = XName.Get("unique", XmlSchemaDocument.XmlSchemaNamespace);
 
         /// <summary>
-        /// Gets the UpdateRule attribute.
+        /// Gets the Using attribute.
         /// </summary>
-        public static XName UpdateRuleName { get; } = XName.Get("updateRule", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName UsingName { get; } = XName.Get("using", XmlSchemaDocument.GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Value attribute.
@@ -275,46 +269,46 @@ namespace GammaFour.XmlSchemaDocument
         public static XName ValueName { get; } = XName.Get("value", string.Empty);
 
         /// <summary>
-        /// Gets the Verbs attribute.
-        /// </summary>
-        public static XName VerbsName { get; } = XName.Get("verbs", XmlSchemaDocument.GammaFourDataNamespace);
-
-        /// <summary>
         /// Gets the XPath attribute.
         /// </summary>
         public static XName XPathName { get; } = XName.Get("xpath", string.Empty);
 
         /// <summary>
-        /// Gets the name of the data domain.
+        /// Gets the name of the data dataModel context.
         /// </summary>
-        public string Domain { get; private set; }
+        public string DataModelContext { get; private set; }
 
         /// <summary>
-        /// Gets the namespace of the data domain.
+        /// Gets the namespace of the data dataModel.
         /// </summary>
-        public string DomainNamespace { get; private set; }
+        public List<string> UsingNamespaces { get; } = new List<string>();
 
         /// <summary>
         /// Gets the constraint elements.
         /// </summary>
-        public List<ForeignKeyElement> ForeignKeys
+        public List<ForeignIndexElement> ForeignIndexes
         {
             get
             {
                 XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);
-                return rootElement.Elements(XmlSchemaDocument.KeyrefName).Cast<ForeignKeyElement>().ToList();
+                return rootElement.Elements(XmlSchemaDocument.KeyrefName).Cast<ForeignIndexElement>().ToList();
             }
         }
 
         /// <summary>
-        /// Gets a value indicating whether the data model supports a persistent Entity Framework store.
+        /// Gets or sets a value indicating whether this is a master data model or a slave.
         /// </summary>
-        public bool? IsVolatile { get; private set; }
+        public bool IsMaster { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether enforces referential integrity.
+        /// </summary>
+        public bool IsRelational { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether the generated controllers require authentication.
         /// </summary>
-        public bool? IsSecure { get; private set; }
+        public JsonNamingPolicy JsonNamingPolicy { get; private set; }
 
         /// <summary>
         /// Gets the name of the data model.
@@ -343,12 +337,12 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the unique key elements.
         /// </summary>
-        public List<UniqueKeyElement> UniqueKeys
+        public List<UniqueIndexElement> UniqueIndexes
         {
             get
             {
                 XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);
-                return rootElement.Elements(XmlSchemaDocument.UniqueName).Cast<UniqueKeyElement>().ToList();
+                return rootElement.Elements(XmlSchemaDocument.UniqueName).Cast<UniqueIndexElement>().ToList();
             }
         }
 

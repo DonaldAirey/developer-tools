@@ -1,8 +1,8 @@
 ﻿// <copyright file="ColumnType.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     /// <summary>
     /// Information about the column's data type.

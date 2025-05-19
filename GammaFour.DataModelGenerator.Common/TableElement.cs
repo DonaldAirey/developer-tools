@@ -1,8 +1,8 @@
 ﻿// <copyright file="TableElement.cs" company="Gamma Four, Inc.">
-//     Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//     Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Collections.Generic;
@@ -16,11 +16,6 @@ namespace GammaFour.XmlSchemaDocument
     public class TableElement : XElement, IComparable<TableElement>
     {
         /// <summary>
-        /// The verbs that will be generated in the RESTApi for this table.
-        /// </summary>
-        private readonly List<Verb> verbs = new List<Verb>();
-
-        /// <summary>
         /// The columns.
         /// </summary>
         private List<ColumnElement> columnElements;
@@ -28,7 +23,7 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// The foreign key elements.
         /// </summary>
-        private List<ForeignKeyElement> foreignKeyElements;
+        private List<ForeignIndexElement> foreignIndexElements;
 
         /// <summary>
         /// The index of the table.
@@ -38,22 +33,22 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// The child foreign key elements.
         /// </summary>
-        private List<ForeignKeyElement> childKeyElements;
+        private List<ForeignIndexElement> childKeyElements;
 
         /// <summary>
         /// The parent key elements.
         /// </summary>
-        private List<ForeignKeyElement> parentKeyElements;
+        private List<ForeignIndexElement> parentKeyElements;
 
         /// <summary>
         /// The primary key element.
         /// </summary>
-        private UniqueKeyElement primaryKeyElement;
+        private UniqueIndexElement primaryKeyElement;
 
         /// <summary>
         /// The unique key elements.
         /// </summary>
-        private List<UniqueKeyElement> uniqueKeyElements;
+        private List<UniqueIndexElement> uniqueIndexElements;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TableElement"/> class.
@@ -64,21 +59,6 @@ namespace GammaFour.XmlSchemaDocument
         {
             // Extract the name from the schema.
             this.Name = this.Attribute(XmlSchemaDocument.ObjectName).Value;
-
-            // This tells us whether the table is persisted in a database or not.
-            XAttribute isVolatileAttribute = this.Attribute(XmlSchemaDocument.IsVolatileName);
-            this.IsVolatile = isVolatileAttribute == null ? false : Convert.ToBoolean(isVolatileAttribute.Value, CultureInfo.InvariantCulture);
-
-            // The verbs tell us what actions to support in the controller when it's built.
-            XAttribute verbAttribute = this.Attribute(XmlSchemaDocument.VerbsName);
-            string verbStrings = verbAttribute == null ? string.Empty : verbAttribute.Value;
-            foreach (string verbString in verbStrings.Split(','))
-            {
-                if (Enum.TryParse<Verb>(verbString, out Verb verb))
-                {
-                    this.verbs.Add(verb);
-                }
-            }
 
             // This will navigate to the sequence of columns.
             XElement complexType = this.Element(XmlSchemaDocument.ComplexTypeName);
@@ -122,18 +102,18 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the ForeignKey constraints.
         /// </summary>
-        public List<ForeignKeyElement> ForeignKeys
+        public List<ForeignIndexElement> ForeignIndexes
         {
             get
             {
-                if (this.foreignKeyElements == null)
+                if (this.foreignIndexElements == null)
                 {
-                    this.foreignKeyElements = (from fke in this.XmlSchemaDocument.ForeignKeys
-                                               where fke.UniqueKey.Table == this
+                    this.foreignIndexElements = (from fke in this.Document.ForeignIndexes
+                                               where fke.UniqueIndex.Table == this
                                                select fke).ToList();
                 }
 
-                return this.foreignKeyElements;
+                return this.foreignIndexElements;
             }
         }
 
@@ -146,17 +126,12 @@ namespace GammaFour.XmlSchemaDocument
             {
                 if (!this.index.HasValue)
                 {
-                    this.index = this.XmlSchemaDocument.Tables.IndexOf(this);
+                    this.index = this.Document.Tables.IndexOf(this);
                 }
 
                 return this.index.Value;
             }
         }
-
-        /// <summary>
-        /// Gets a value indicating whether the table supports write-through operations to a persistent store.
-        /// </summary>
-        public bool IsVolatile { get; private set; }
 
         /// <summary>
         /// Gets the name of the table.
@@ -166,14 +141,14 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the foreign keys which are children of this table.
         /// </summary>
-        public List<ForeignKeyElement> ChildKeys
+        public List<ForeignIndexElement> ChildIndexes
         {
             get
             {
                 if (this.childKeyElements == null)
                 {
-                    this.childKeyElements = (from fke in this.XmlSchemaDocument.ForeignKeys
-                                             where fke.UniqueKey.Table == this
+                    this.childKeyElements = (from fke in this.Document.ForeignIndexes
+                                             where fke.UniqueIndex.Table == this
                                              orderby fke.Name
                                              select fke).ToList();
                 }
@@ -185,13 +160,13 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the foreign keys which are the parents of this table.
         /// </summary>
-        public List<ForeignKeyElement> ParentKeys
+        public List<ForeignIndexElement> ParentIndexes
         {
             get
             {
                 if (this.parentKeyElements == null)
                 {
-                    this.parentKeyElements = (from fke in this.XmlSchemaDocument.ForeignKeys
+                    this.parentKeyElements = (from fke in this.Document.ForeignIndexes
                                               where fke.Table == this
                                               orderby fke.Name
                                               select fke).ToList();
@@ -204,14 +179,14 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the primary key on this table.
         /// </summary>
-        public UniqueKeyElement PrimaryKey
+        public UniqueIndexElement PrimaryIndex
         {
             get
             {
                 if (this.primaryKeyElement == null)
                 {
-                    this.primaryKeyElement = (from uk in this.UniqueKeys
-                                              where uk.IsPrimaryKey
+                    this.primaryKeyElement = (from uk in this.UniqueIndexes
+                                              where uk.IsPrimaryIndex
                                               select uk).FirstOrDefault();
                 }
 
@@ -222,41 +197,30 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Gets the unique constraints.
         /// </summary>
-        public List<UniqueKeyElement> UniqueKeys
+        public List<UniqueIndexElement> UniqueIndexes
         {
             get
             {
-                if (this.uniqueKeyElements == null)
+                if (this.uniqueIndexElements == null)
                 {
-                    this.uniqueKeyElements = (from uke in this.XmlSchemaDocument.UniqueKeys
+                    this.uniqueIndexElements = (from uke in this.Document.UniqueIndexes
                                               where uke.Table == this
                                               orderby uke.Name
                                               select uke).ToList();
                 }
 
-                return this.uniqueKeyElements;
+                return this.uniqueIndexElements;
             }
         }
 
         /// <summary>
         /// Gets the owner document.
         /// </summary>
-        public XmlSchemaDocument XmlSchemaDocument
+        public new XmlSchemaDocument Document
         {
             get
             {
-                return this.Document as XmlSchemaDocument;
-            }
-        }
-
-        /// <summary>
-        /// Gets the verbs supported by the controller.
-        /// </summary>
-        public IEnumerable<Verb> Verbs
-        {
-            get
-            {
-                return this.verbs;
+                return base.Document as XmlSchemaDocument;
             }
         }
 
@@ -333,7 +297,7 @@ namespace GammaFour.XmlSchemaDocument
         }
 
         /// <summary>
-        /// Compares two <see cref="TableElement"/> records.
+        /// Compares two <see cref="TableElement"/> rows.
         /// </summary>
         /// <param name="left">The left operand.</param>
         /// <param name="right">The right operand.</param>

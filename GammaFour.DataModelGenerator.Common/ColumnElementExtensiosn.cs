@@ -1,10 +1,9 @@
-﻿// <copyright file="Conversions.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+﻿// <copyright file="ColumnElementExtensiosn.cs" company="Gamma Four, Inc.">
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
-    using System;
     using System.Collections.Generic;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +11,7 @@ namespace GammaFour.XmlSchemaDocument
     /// <summary>
     /// A set of methods to assist in converting type information.
     /// </summary>
-    public static class Conversions
+    public static class ColumnElementExtensiosn
     {
         /// <summary>
         /// Maps the CLR full type name to a predefined type syntax.
@@ -37,20 +36,15 @@ namespace GammaFour.XmlSchemaDocument
         /// <summary>
         /// Translates the given type into a type syntax.
         /// </summary>
-        /// <param name="columnType">The column's type.</param>
+        /// <param name="columnElement">The column element.</param>
         /// <returns>A Roslyn type syntax corresponding to the CLR type.</returns>
-        public static TypeSyntax FromType(ColumnType columnType)
+        public static TypeSyntax GetTypeSyntax(this ColumnElement columnElement)
         {
-            // Validate the parameter
-            if (columnType == null)
-            {
-                throw new ArgumentNullException(nameof(columnType));
-            }
-
+            var columnType = columnElement.ColumnType;
             if (columnType.IsNullable && columnType.IsValueType)
             {
                 TypeSyntax nullableTypeSyntax = null;
-                if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
+                if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
                 {
                     nullableTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
@@ -61,7 +55,7 @@ namespace GammaFour.XmlSchemaDocument
             if (columnType.IsArray)
             {
                 TypeSyntax arrayTypeSyntax = null;
-                if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
+                if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
                 {
                     arrayTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
@@ -76,12 +70,12 @@ namespace GammaFour.XmlSchemaDocument
             }
 
             TypeSyntax typeSyntax = null;
-            if (!Conversions.PredefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
+            if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
             {
                 typeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
             }
 
-            return typeSyntax;
+            return columnType.IsNullable ? SyntaxFactory.NullableType(typeSyntax) : typeSyntax;
         }
     }
 }

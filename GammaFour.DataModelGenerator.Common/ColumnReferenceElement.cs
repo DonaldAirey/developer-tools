@@ -1,8 +1,8 @@
 ﻿// <copyright file="ColumnReferenceElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Linq;
@@ -79,10 +79,10 @@ namespace GammaFour.XmlSchemaDocument
                 if (this.parentColumn == null)
                 {
                     // If this is a forieng index then return the column in the parent table that corresponds to this column reference.
-                    ForeignKeyElement foreignKeyElement = this.Parent as ForeignKeyElement;
-                    if (foreignKeyElement != null)
+                    ForeignIndexElement foreignIndexElement = this.Parent as ForeignIndexElement;
+                    if (foreignIndexElement != null)
                     {
-                        this.parentColumn = foreignKeyElement.UniqueKey.Columns[foreignKeyElement.Columns.IndexOf(this)].Column;
+                        this.parentColumn = foreignIndexElement.UniqueIndex.Columns[foreignIndexElement.Columns.IndexOf(this)].Column;
                     }
                 }
 

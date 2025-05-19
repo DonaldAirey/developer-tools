@@ -1,8 +1,8 @@
-﻿// <copyright file="ForeignKeyElement.cs" company="Gamma Four, Inc.">
-//    Copyright © 2021 - Gamma Four, Inc.  All Rights Reserved.
+﻿// <copyright file="ForeignIndexElement.cs" company="Gamma Four, Inc.">
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.XmlSchemaDocument
+namespace GammaFour.DataModelGenerator.Common
 {
     using System;
     using System.Collections.Generic;
@@ -12,12 +12,12 @@ namespace GammaFour.XmlSchemaDocument
     /// <summary>
     /// Creates foreign key constraint on a table.
     /// </summary>
-    public class ForeignKeyElement : ConstraintElement
+    public class ForeignIndexElement : ConstraintElement
     {
         /// <summary>
         /// A unique key element.
         /// </summary>
-        private UniqueKeyElement uniqueKeyElement;
+        private UniqueIndexElement uniqueIndexElement;
 
         /// <summary>
         /// The name of the parent table.
@@ -30,36 +30,15 @@ namespace GammaFour.XmlSchemaDocument
         private string uniqueChildName;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ForeignKeyElement"/> class.
+        /// Initializes a new instance of the <see cref="ForeignIndexElement"/> class.
         /// </summary>
         /// <param name="xElement">The description of the unique constraint.</param>
-        public ForeignKeyElement(XElement xElement)
+        public ForeignIndexElement(XElement xElement)
             : base(xElement)
         {
-            // Validate the parameter
-            if (xElement == null)
-            {
-                throw new ArgumentNullException(nameof(xElement));
-            }
-
             // Initialize the object.
             this.Refer = this.Attribute(XmlSchemaDocument.ReferName).Value;
-
-            // Parse the cascading delete rule out of the specification.
-            XAttribute deleteRuleAttribute = xElement.Attribute(XmlSchemaDocument.DeleteRuleName);
-            this.DeleteRule = deleteRuleAttribute == null ?
-                CascadeRule.Cascade : (CascadeRule)Enum.Parse(typeof(CascadeRule), deleteRuleAttribute.Value);
-
-            // Parse the cascading update rule out of the specification.
-            XAttribute updateRuleAttribute = xElement.Attribute(XmlSchemaDocument.UpdateRuleName);
-            this.UpdateRule = updateRuleAttribute == null ?
-                CascadeRule.None : (CascadeRule)Enum.Parse(typeof(CascadeRule), updateRuleAttribute.Value);
         }
-
-        /// <summary>
-        /// Gets the rule that describes what happens to child records when a record is deleted.
-        /// </summary>
-        public CascadeRule DeleteRule { get; } = CascadeRule.Cascade;
 
         /// <summary>
         /// Gets the name of the unique key.
@@ -73,25 +52,25 @@ namespace GammaFour.XmlSchemaDocument
         {
             get
             {
-                return this.UniqueKey.Columns;
+                return this.UniqueIndex.Columns;
             }
         }
 
         /// <summary>
-        /// Gets the unique key that to whic this foreign key refers.
+        /// Gets the unique key that to which this foreign key refers.
         /// </summary>
-        public UniqueKeyElement UniqueKey
+        public UniqueIndexElement UniqueIndex
         {
             get
             {
-                if (this.uniqueKeyElement == null)
+                if (this.uniqueIndexElement == null)
                 {
                     try
                     {
-                        this.uniqueKeyElement = (from uk in this.XmlSchemaDocument.UniqueKeys
+                        this.uniqueIndexElement = (from uk in this.XmlSchemaDocument.UniqueIndexes
                                                  where uk.Name == this.Refer
                                                  select uk).SingleOrDefault();
-                        if (this.uniqueKeyElement == default(UniqueKeyElement))
+                        if (this.uniqueIndexElement == default(UniqueIndexElement))
                         {
                             throw new InvalidOperationException($"Foreign key constraint {this.Name} can't find referenced unique key constraint {this.Refer}");
                         }
@@ -102,7 +81,7 @@ namespace GammaFour.XmlSchemaDocument
                     }
                 }
 
-                return this.uniqueKeyElement;
+                return this.uniqueIndexElement;
             }
         }
 
@@ -116,7 +95,7 @@ namespace GammaFour.XmlSchemaDocument
                 if (this.uniqueParentName == null)
                 {
                     // Determinesd if there is a distinct path to the parent table.
-                    var isDistinctPathToParent = (from fke in this.UniqueKey.Table.ForeignKeys
+                    var isDistinctPathToParent = (from fke in this.UniqueIndex.Table.ForeignIndexes
                                                   where fke.Table == this.Table
                                                   select fke).Count() == 1;
 
@@ -124,11 +103,11 @@ namespace GammaFour.XmlSchemaDocument
                     // key with the columns that will make it unique.
                     if (isDistinctPathToParent)
                     {
-                        this.uniqueParentName = this.UniqueKey.Table.Name;
+                        this.uniqueParentName = this.UniqueIndex.Table.Name;
                     }
                     else
                     {
-                        this.uniqueParentName = this.UniqueKey.Table.Name + "By";
+                        this.uniqueParentName = this.UniqueIndex.Table.Name + "By";
                         foreach (ColumnReferenceElement columnReferenceElement in this.Columns)
                         {
                             this.uniqueParentName += columnReferenceElement.Column.Name;
@@ -150,7 +129,7 @@ namespace GammaFour.XmlSchemaDocument
                 if (this.uniqueChildName == null)
                 {
                     // Determines if there's a single path to the child tables.
-                    var isDistinctPathToChild = (from fke in this.UniqueKey.Table.ForeignKeys
+                    var isDistinctPathToChild = (from fke in this.UniqueIndex.Table.ForeignIndexes
                                                  where fke.Table == this.Table
                                                  select fke).Count() == 1;
 
@@ -173,11 +152,5 @@ namespace GammaFour.XmlSchemaDocument
                 return this.uniqueChildName;
             }
         }
-
-        /// <summary>
-        /// Gets the rule that describes what happens to child records when a record is updated.
-        /// </summary>
-        /// <value>The rule that describes what happens to child records when a record is updated.</value>
-        public CascadeRule UpdateRule { get; } = CascadeRule.Cascade;
     }
 }
