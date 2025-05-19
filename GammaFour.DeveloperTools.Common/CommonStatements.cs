@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System.Collections.Generic;
     using Microsoft.CodeAnalysis;
@@ -35,7 +35,7 @@ namespace GammaFour.DataModelGenerator.Common
                             .WithIdentifier(
                                 SyntaxFactory.Identifier("operationCanceledException")))
                         .WithBlock(
-                            SyntaxFactory.Block(CommonStatements.HandleOperationCanceledException)),
+                            SyntaxFactory.Block(HandleOperationCanceledException)),
 
                     //            catch (Exception exception)
                     //            {
@@ -48,11 +48,11 @@ namespace GammaFour.DataModelGenerator.Common
                         .WithIdentifier(
                             SyntaxFactory.Identifier("exception")))
                     .WithBlock(
-                        SyntaxFactory.Block(CommonStatements.HandleException)),
+                        SyntaxFactory.Block(HandleException)),
                 };
 
                 // This is the collection of catch clauses.
-                return SyntaxFactory.List<CatchClauseSyntax>(clauses);
+                return SyntaxFactory.List(clauses);
             }
         }
 
@@ -77,7 +77,7 @@ namespace GammaFour.DataModelGenerator.Common
                             .WithIdentifier(
                                 SyntaxFactory.Identifier("concurrencyException")))
                         .WithBlock(
-                            SyntaxFactory.Block(CommonStatements.HandleConcurrencyException)),
+                            SyntaxFactory.Block(HandleConcurrencyException)),
 
                     //            catch (ConstraintException constraintException)
                     //            {
@@ -90,7 +90,7 @@ namespace GammaFour.DataModelGenerator.Common
                             .WithIdentifier(
                                 SyntaxFactory.Identifier("constraintException")))
                         .WithBlock(
-                            SyntaxFactory.Block(CommonStatements.HandleConstraintException)),
+                            SyntaxFactory.Block(HandleConstraintException)),
 
                     //            catch (OperationCanceledException operationCanceledException)
                     //            {
@@ -103,7 +103,7 @@ namespace GammaFour.DataModelGenerator.Common
                             .WithIdentifier(
                                 SyntaxFactory.Identifier("operationCanceledException")))
                         .WithBlock(
-                            SyntaxFactory.Block(CommonStatements.HandleOperationCanceledException)),
+                            SyntaxFactory.Block(HandleOperationCanceledException)),
 
                     //            catch (Exception exception)
                     //            {
@@ -116,11 +116,11 @@ namespace GammaFour.DataModelGenerator.Common
                         .WithIdentifier(
                             SyntaxFactory.Identifier("exception")))
                     .WithBlock(
-                        SyntaxFactory.Block(CommonStatements.HandleException)),
+                        SyntaxFactory.Block(HandleException)),
                 };
 
                 // This is the collection of catch clauses.
-                return SyntaxFactory.List<CatchClauseSyntax>(clauses);
+                return SyntaxFactory.List(clauses);
             }
         }
 
@@ -173,7 +173,7 @@ namespace GammaFour.DataModelGenerator.Common
                                 SyntaxFactory.IdentifierName("StatusCode")))
                         .WithArgumentList(
                             SyntaxFactory.ArgumentList(
-                                SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                SyntaxFactory.SingletonSeparatedList(
                                     SyntaxFactory.Argument(
                                         SyntaxFactory.MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
@@ -235,7 +235,7 @@ namespace GammaFour.DataModelGenerator.Common
                                 SyntaxFactory.IdentifierName("StatusCode")))
                         .WithArgumentList(
                             SyntaxFactory.ArgumentList(
-                                SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                SyntaxFactory.SingletonSeparatedList(
                                     SyntaxFactory.Argument(
                                         SyntaxFactory.MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,
@@ -297,12 +297,12 @@ namespace GammaFour.DataModelGenerator.Common
                                 SyntaxFactory.IdentifierName("BadRequest")))
                         .WithArgumentList(
                             SyntaxFactory.ArgumentList(
-                                SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                SyntaxFactory.SingletonSeparatedList(
                                     SyntaxFactory.Argument(
                                         SyntaxFactory.InterpolatedStringExpression(
                                             SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken))
                                         .WithContents(
-                                            SyntaxFactory.List<InterpolatedStringContentSyntax>(
+                                            SyntaxFactory.List(
                                                 new InterpolatedStringContentSyntax[]
                                                 {
                                                     SyntaxFactory.Interpolation(
@@ -381,7 +381,7 @@ namespace GammaFour.DataModelGenerator.Common
                                 SyntaxFactory.IdentifierName("StatusCode")))
                         .WithArgumentList(
                             SyntaxFactory.ArgumentList(
-                                SyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                SyntaxFactory.SingletonSeparatedList(
                                     SyntaxFactory.Argument(
                                         SyntaxFactory.MemberAccessExpression(
                                             SyntaxKind.SimpleMemberAccessExpression,

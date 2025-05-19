@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System;
     using System.Collections.Generic;
@@ -69,7 +69,7 @@ namespace GammaFour.DataModelGenerator.Common
                     {
                         this.uniqueIndexElement = (from uk in this.XmlSchemaDocument.UniqueIndexes
                                                  where uk.Name == this.Refer
-                                                 select uk).SingleOrDefault();
+                                              select uk).SingleOrDefault();
                         if (this.uniqueIndexElement == default(UniqueIndexElement))
                         {
                             throw new InvalidOperationException($"Foreign key constraint {this.Name} can't find referenced unique key constraint {this.Refer}");

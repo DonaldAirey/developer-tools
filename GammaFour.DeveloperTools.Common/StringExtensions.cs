@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System.Collections.Generic;
     using System.Globalization;
@@ -56,7 +56,7 @@ namespace GammaFour.DataModelGenerator.Common
 
             // Convert the variable to its camel case equivalent.
             var name = text.Substring(0, 1).ToLower(CultureInfo.InvariantCulture) + text.Remove(0, 1);
-            return StringExtensions.Keywords.Contains(name) ? "@" + name : name;
+            return Keywords.Contains(name) ? "@" + name : name;
         }
 
         /// <summary>

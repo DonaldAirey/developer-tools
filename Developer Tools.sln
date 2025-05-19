@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35913.81 d17.13
+VisualStudioVersion = 17.13.35913.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Developer Tools", "Developer Tools\Developer Tools.csproj", "{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GammaFour.DataModelGenerator.Common", "GammaFour.DataModelGenerator.Common\GammaFour.DataModelGenerator.Common.csproj", "{4E913D07-CC74-309A-CE5F-355426AB8EED}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GammaFour.DeveloperTools.Common", "GammaFour.DeveloperTools.Common\GammaFour.DeveloperTools.Common.csproj", "{5AB05564-D09B-A888-6F25-FDFD797B3D58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Development|Any CPU.Build.0 = Development|Any CPU
 		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Production|Any CPU.ActiveCfg = Production|Any CPU
 		{DC8969A2-C3E8-480B-9EE4-68F60D199AC2}.Production|Any CPU.Build.0 = Production|Any CPU
-		{4E913D07-CC74-309A-CE5F-355426AB8EED}.Development|Any CPU.ActiveCfg = Development|Any CPU
-		{4E913D07-CC74-309A-CE5F-355426AB8EED}.Development|Any CPU.Build.0 = Development|Any CPU
-		{4E913D07-CC74-309A-CE5F-355426AB8EED}.Production|Any CPU.ActiveCfg = Production|Any CPU
-		{4E913D07-CC74-309A-CE5F-355426AB8EED}.Production|Any CPU.Build.0 = Production|Any CPU
+		{5AB05564-D09B-A888-6F25-FDFD797B3D58}.Development|Any CPU.ActiveCfg = Development|Any CPU
+		{5AB05564-D09B-A888-6F25-FDFD797B3D58}.Development|Any CPU.Build.0 = Development|Any CPU
+		{5AB05564-D09B-A888-6F25-FDFD797B3D58}.Production|Any CPU.ActiveCfg = Production|Any CPU
+		{5AB05564-D09B-A888-6F25-FDFD797B3D58}.Production|Any CPU.Build.0 = Production|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

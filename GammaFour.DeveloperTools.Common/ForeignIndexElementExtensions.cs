@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System.Collections.Generic;
     using Microsoft.CodeAnalysis;
@@ -142,13 +142,13 @@ namespace GammaFour.DataModelGenerator.Common
             {
                 var columnElement = columnReferenceElement.Column;
                 ExpressionSyntax firstTerm = operand1 == null ?
-                    (ExpressionSyntax)SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression) :
+                    SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression) :
                     (ExpressionSyntax)SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         SyntaxFactory.IdentifierName(operand1),
                         SyntaxFactory.IdentifierName(columnElement.Name));
                 ExpressionSyntax secondTerm = operand2 == null ?
-                    (ExpressionSyntax)SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression) :
+                    SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression) :
                     (ExpressionSyntax)SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         SyntaxFactory.IdentifierName(operand2),
@@ -227,7 +227,7 @@ namespace GammaFour.DataModelGenerator.Common
                 // string code
                 var columnElement = foreignIndexElement.Columns[0].Column;
                 return SyntaxFactory.ParameterList(
-                    SyntaxFactory.SingletonSeparatedList<ParameterSyntax>(
+                    SyntaxFactory.SingletonSeparatedList(
                         SyntaxFactory.Parameter(
                             SyntaxFactory.Identifier(columnElement.Name.ToVariableName()))
                         .WithType(columnElement.GetTypeSyntax())));

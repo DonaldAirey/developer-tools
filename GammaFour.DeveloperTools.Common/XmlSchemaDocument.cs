@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System;
     using System.Collections.Generic;
@@ -32,32 +32,32 @@ namespace GammaFour.DataModelGenerator.Common
         /// </summary>
         /// <param name="fileContents">The contents of a file that specifies the schema in XML.</param>
         public XmlSchemaDocument(string fileContents)
-            : base(XDocument.Parse(fileContents))
+            : base(Parse(fileContents))
         {
             // The root element of the schema definition.
-            XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);
+            XElement rootElement = this.Root.Element(ElementName);
 
             // Extract the name and the target namespace from the schema.
-            this.Name = this.Root.Element(XmlSchemaDocument.ElementName).Attribute("name").Value;
+            this.Name = this.Root.Element(ElementName).Attribute("name").Value;
             this.TargetNamespace = this.Root.Attribute("targetNamespace").Value;
 
             // This tells us where the data dataModel when compiling the REST API.
-            XAttribute usingAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.UsingName);
+            XAttribute usingAttribute = this.Root.Element(ElementName).Attribute(UsingName);
             if (usingAttribute != null)
             {
                 this.UsingNamespaces.AddRange(usingAttribute.Value.Split(','));
             }
 
             // This tells us whether to provide an interface to Entity Framework or not.
-            XAttribute isMasterAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsMasterName);
+            XAttribute isMasterAttribute = this.Root.Element(ElementName).Attribute(IsMasterName);
             this.IsMaster = isMasterAttribute == null ? true : Convert.ToBoolean(isMasterAttribute.Value, CultureInfo.InvariantCulture);
 
             // This tells us whether the generated model should employ relational intergity.
-            XAttribute isRelationalAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.IsRelationalName);
+            XAttribute isRelationalAttribute = this.Root.Element(ElementName).Attribute(IsRelationalName);
             this.IsRelational = isRelationalAttribute == null ? true : Convert.ToBoolean(isRelationalAttribute.Value, CultureInfo.InvariantCulture);
 
             // This tells the generator what kind of naming convension to use for JSON properties.
-            XAttribute jsonNamingPolicyAttribute = this.Root.Element(XmlSchemaDocument.ElementName).Attribute(XmlSchemaDocument.JsonNamingPolicyName);
+            XAttribute jsonNamingPolicyAttribute = this.Root.Element(ElementName).Attribute(JsonNamingPolicyName);
             if (jsonNamingPolicyAttribute == null)
             {
                 // The default naming policy for JSON properties is camel case.
@@ -76,12 +76,12 @@ namespace GammaFour.DataModelGenerator.Common
             }
 
             // The data model description is found on the first element of the first complex type in the module.
-            XElement complexTypeElement = rootElement.Element(XmlSchemaDocument.ComplexTypeName);
-            XElement choiceElement = complexTypeElement.Element(XmlSchemaDocument.ChoiceName);
+            XElement complexTypeElement = rootElement.Element(ComplexTypeName);
+            XElement choiceElement = complexTypeElement.Element(ChoiceName);
 
             // We're going to remove all the generic XElements from the section of the schema where the tables live and replace them with decorated
             // ones (that is, decorated with links to constraints, foreign keys, etc.)
-            List<XElement> tables = choiceElement.Elements(XmlSchemaDocument.ElementName).ToList();
+            List<XElement> tables = choiceElement.Elements(ElementName).ToList();
             foreach (XElement xElement in tables)
             {
                 // This create a description of the table.
@@ -90,7 +90,7 @@ namespace GammaFour.DataModelGenerator.Common
             }
 
             // This will remove all the undecorated unique keys and replace them with decorated ones.
-            List<XElement> uniqueIndexElements = rootElement.Elements(XmlSchemaDocument.UniqueName).ToList();
+            List<XElement> uniqueIndexElements = rootElement.Elements(UniqueName).ToList();
             foreach (XElement xElement in uniqueIndexElements)
             {
                 // This creates the unique constraints.
@@ -99,7 +99,7 @@ namespace GammaFour.DataModelGenerator.Common
             }
 
             // From the data model description, create a description of the foreign key constraints and the relation between the tables.
-            List<XElement> keyRefElements = rootElement.Elements(XmlSchemaDocument.KeyrefName).ToList();
+            List<XElement> keyRefElements = rootElement.Elements(KeyrefName).ToList();
             foreach (XElement xElement in keyRefElements)
             {
                 // This will create the foreign key constraints if they're requested.
@@ -131,7 +131,7 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Gets the  indication that a custom type is specified.
         /// </summary>
-        public static XName AnyTypeName { get; } = XName.Get("anyType", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName AnyTypeName { get; } = XName.Get("anyType", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Base attribute.
@@ -141,17 +141,17 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Gets the Choice element.
         /// </summary>
-        public static XName ChoiceName { get; } = XName.Get("choice", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName ChoiceName { get; } = XName.Get("choice", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the ComplexType element.
         /// </summary>
-        public static XName ComplexTypeName { get; } = XName.Get("complexType", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName ComplexTypeName { get; } = XName.Get("complexType", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the DataType attribute.
         /// </summary>
-        public static XName DataTypeName { get; } = XName.Get("dataType", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName DataTypeName { get; } = XName.Get("dataType", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Default attribute.
@@ -161,52 +161,52 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Gets the Element element.
         /// </summary>
-        public static XName ElementName { get; } = XName.Get("element", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName ElementName { get; } = XName.Get("element", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Field element.
         /// </summary>
-        public static XName FieldName { get; } = XName.Get("field", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName FieldName { get; } = XName.Get("field", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the FactionDigits element.
         /// </summary>
-        public static XName FractionDigitsName { get; } = XName.Get("fractionDigits", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName FractionDigitsName { get; } = XName.Get("fractionDigits", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the IsPrimaryIndex attribute.
         /// </summary>
-        public static XName IsPrimaryIndexName { get; } = XName.Get("isPrimaryIndex", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsPrimaryIndexName { get; } = XName.Get("isPrimaryIndex", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the IsRelational attribute.
         /// </summary>
-        public static XName IsRelationalName { get; } = XName.Get("isRelational", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsRelationalName { get; } = XName.Get("isRelational", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the IsMaster attribute.
         /// </summary>
-        public static XName IsMasterName { get; } = XName.Get("isMaster", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsMasterName { get; } = XName.Get("isMaster", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the IsRowVersion attribute.
         /// </summary>
-        public static XName IsRowVersionName { get; } = XName.Get("isRowVersion", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName IsRowVersionName { get; } = XName.Get("isRowVersion", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the JsonNamingPolicy attribute.
         /// </summary>
-        public static XName JsonNamingPolicyName { get; } = XName.Get("jsonNamingPolicy", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName JsonNamingPolicyName { get; } = XName.Get("jsonNamingPolicy", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Keyref element.
         /// </summary>
-        public static XName KeyrefName { get; } = XName.Get("keyref", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName KeyrefName { get; } = XName.Get("keyref", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the MaxLength element.
         /// </summary>
-        public static XName MaxLengthName { get; } = XName.Get("maxLength", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName MaxLengthName { get; } = XName.Get("maxLength", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the MinOccurs attribute.
@@ -226,27 +226,27 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Gets the Restriction element.
         /// </summary>
-        public static XName RestrictionName { get; } = XName.Get("restriction", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName RestrictionName { get; } = XName.Get("restriction", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Selector element.
         /// </summary>
-        public static XName SelectorName { get; } = XName.Get("selector", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName SelectorName { get; } = XName.Get("selector", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Sequence element.
         /// </summary>
-        public static XName SequenceName { get; } = XName.Get("sequence", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName SequenceName { get; } = XName.Get("sequence", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the SimpleType element.
         /// </summary>
-        public static XName SimpleTypeName { get; } = XName.Get("simpleType", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName SimpleTypeName { get; } = XName.Get("simpleType", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the TotalDigits element.
         /// </summary>
-        public static XName TotalDigitsName { get; } = XName.Get("totalDigits", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName TotalDigitsName { get; } = XName.Get("totalDigits", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Type attribute.
@@ -256,12 +256,12 @@ namespace GammaFour.DataModelGenerator.Common
         /// <summary>
         /// Gets the Unique element.
         /// </summary>
-        public static XName UniqueName { get; } = XName.Get("unique", XmlSchemaDocument.XmlSchemaNamespace);
+        public static XName UniqueName { get; } = XName.Get("unique", XmlSchemaNamespace);
 
         /// <summary>
         /// Gets the Using attribute.
         /// </summary>
-        public static XName UsingName { get; } = XName.Get("using", XmlSchemaDocument.GammaFourDataNamespace);
+        public static XName UsingName { get; } = XName.Get("using", GammaFourDataNamespace);
 
         /// <summary>
         /// Gets the Value attribute.
@@ -290,8 +290,8 @@ namespace GammaFour.DataModelGenerator.Common
         {
             get
             {
-                XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);
-                return rootElement.Elements(XmlSchemaDocument.KeyrefName).Cast<ForeignIndexElement>().ToList();
+                XElement rootElement = this.Root.Element(ElementName);
+                return rootElement.Elements(KeyrefName).Cast<ForeignIndexElement>().ToList();
             }
         }
 
@@ -322,10 +322,10 @@ namespace GammaFour.DataModelGenerator.Common
         {
             get
             {
-                XElement dataModelElement = this.Root.Element(XmlSchemaDocument.ElementName);
-                XElement complexTypeElement = dataModelElement.Element(XmlSchemaDocument.ComplexTypeName);
-                XElement choiceElement = complexTypeElement.Element(XmlSchemaDocument.ChoiceName);
-                return choiceElement.Elements(XmlSchemaDocument.ElementName).Cast<TableElement>().ToList();
+                XElement dataModelElement = this.Root.Element(ElementName);
+                XElement complexTypeElement = dataModelElement.Element(ComplexTypeName);
+                XElement choiceElement = complexTypeElement.Element(ChoiceName);
+                return choiceElement.Elements(ElementName).Cast<TableElement>().ToList();
             }
         }
 
@@ -341,8 +341,8 @@ namespace GammaFour.DataModelGenerator.Common
         {
             get
             {
-                XElement rootElement = this.Root.Element(XmlSchemaDocument.ElementName);
-                return rootElement.Elements(XmlSchemaDocument.UniqueName).Cast<UniqueIndexElement>().ToList();
+                XElement rootElement = this.Root.Element(ElementName);
+                return rootElement.Elements(UniqueName).Cast<UniqueIndexElement>().ToList();
             }
         }
 

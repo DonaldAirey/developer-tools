@@ -2,7 +2,7 @@
 //     Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System;
     using System.Collections.Generic;
@@ -186,7 +186,7 @@ namespace GammaFour.DataModelGenerator.Common
                 if (this.primaryKeyElement == null)
                 {
                     this.primaryKeyElement = (from uk in this.UniqueIndexes
-                                              where uk.IsPrimaryIndex
+                                         where uk.IsPrimaryIndex
                                               select uk).FirstOrDefault();
                 }
 
@@ -233,9 +233,9 @@ namespace GammaFour.DataModelGenerator.Common
         public static bool operator ==(TableElement left, TableElement right)
         {
             // Compare the left to the right.  Don't use operators or you'll recurse.
-            if (object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
-                return object.ReferenceEquals(right, null);
+                return ReferenceEquals(right, null);
             }
 
             return left.Equals(right);
@@ -305,13 +305,13 @@ namespace GammaFour.DataModelGenerator.Common
         public static int Compare(TableElement left, TableElement right)
         {
             // Don't use operators or you'll recurse.  If the left and right objects are the same object, then they're equal.
-            if (object.ReferenceEquals(left, right))
+            if (ReferenceEquals(left, right))
             {
                 return 0;
             }
 
             // The left operand can never be equal to null.
-            if (object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
                 return -1;
             }
@@ -325,7 +325,7 @@ namespace GammaFour.DataModelGenerator.Common
         {
             // Comparing against null will always be false.
             TableElement other = obj as TableElement;
-            if (object.ReferenceEquals(other, null))
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }

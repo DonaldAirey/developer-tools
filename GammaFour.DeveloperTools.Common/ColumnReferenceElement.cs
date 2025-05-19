@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System;
     using System.Linq;
@@ -42,7 +42,7 @@ namespace GammaFour.DataModelGenerator.Common
             : base(xElement)
         {
             // Pull the column name out of the XPath.
-            Match match = ColumnReferenceElement.XPath.Match(this.Attribute(XmlSchemaDocument.XPathName).Value);
+            Match match = XPath.Match(this.Attribute(XmlSchemaDocument.XPathName).Value);
             this.name = match.Groups[match.Groups.Count - 1].Value;
         }
 
@@ -58,8 +58,8 @@ namespace GammaFour.DataModelGenerator.Common
                     ConstraintElement parentConstraint = this.Parent as ConstraintElement;
                     this.columnElement = (from ce in parentConstraint.Table.Columns
                                           where ce.Name == this.name
-                                          select ce).SingleOrDefault();
-                    if (this.columnElement == default(ColumnElement))
+                                     select ce).SingleOrDefault();
+                    if (this.columnElement == default)
                     {
                         throw new InvalidOperationException($"The column {this.name} in constraint {parentConstraint.Name} doesn't exist in table {parentConstraint.Table.Name}.");
                     }

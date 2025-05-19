@@ -1,12 +1,12 @@
 // <copyright file="ScrubXsdCommand.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 namespace GammaFour.DeveloperTools
 {
     using EnvDTE;
     using EnvDTE80;
-    using GammaFour.DataModelGenerator.Common;
+    using GammaFour.DeveloperTools.Common;
     using GammaFour.DeveloperTools.Properties;
     using Microsoft;
     using Microsoft.VisualStudio.Shell;

@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System;
     using System.Collections.Generic;
@@ -95,7 +95,7 @@ namespace GammaFour.DataModelGenerator.Common
                     // specification, but we can pull it apart to get the table name for which this constraint is intended.
                     XElement selectorElement = this.Element(XmlSchemaDocument.SelectorName);
                     XAttribute xPathAttribute = selectorElement.Attribute(XmlSchemaDocument.XPathName);
-                    Match match = ConstraintElement.XPath.Match(xPathAttribute.Value);
+                    Match match = XPath.Match(xPathAttribute.Value);
                     if (!match.Success)
                     {
                         throw new InvalidOperationException($"Unique Constraint {this.Name} can't parse expression '{xPathAttribute.Value}'");
@@ -124,9 +124,9 @@ namespace GammaFour.DataModelGenerator.Common
         public static bool operator ==(ConstraintElement left, ConstraintElement right)
         {
             // Compare the left to the right.  Don't use operators or you'll recurse.
-            if (object.ReferenceEquals(left, null))
+            if (ReferenceEquals(left, null))
             {
-                return object.ReferenceEquals(right, null);
+                return ReferenceEquals(right, null);
             }
 
             return left.Equals(right);
@@ -148,7 +148,7 @@ namespace GammaFour.DataModelGenerator.Common
         {
             // Comparing against null will always be false.
             ConstraintElement other = obj as ConstraintElement;
-            if (object.ReferenceEquals(other, null))
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }

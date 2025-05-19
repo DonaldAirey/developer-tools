@@ -2,7 +2,7 @@
 //    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
-namespace GammaFour.DataModelGenerator.Common
+namespace GammaFour.DeveloperTools.Common
 {
     using System.Collections.Generic;
     using Microsoft.CodeAnalysis.CSharp;
@@ -44,7 +44,7 @@ namespace GammaFour.DataModelGenerator.Common
             if (columnType.IsNullable && columnType.IsValueType)
             {
                 TypeSyntax nullableTypeSyntax = null;
-                if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
+                if (!PredefinedTypes.TryGetValue(columnType.FullName, out nullableTypeSyntax))
                 {
                     nullableTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
@@ -55,14 +55,14 @@ namespace GammaFour.DataModelGenerator.Common
             if (columnType.IsArray)
             {
                 TypeSyntax arrayTypeSyntax = null;
-                if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
+                if (!PredefinedTypes.TryGetValue(columnType.FullName, out arrayTypeSyntax))
                 {
                     arrayTypeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
                 }
 
                 return SyntaxFactory.ArrayType(arrayTypeSyntax)
                     .WithRankSpecifiers(
-                        SyntaxFactory.SingletonList<ArrayRankSpecifierSyntax>(
+                        SyntaxFactory.SingletonList(
                             SyntaxFactory.ArrayRankSpecifier(
                                 SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
                                     SyntaxFactory.OmittedArraySizeExpression()
@@ -70,7 +70,7 @@ namespace GammaFour.DataModelGenerator.Common
             }
 
             TypeSyntax typeSyntax = null;
-            if (!ColumnElementExtensiosn.PredefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
+            if (!PredefinedTypes.TryGetValue(columnType.FullName, out typeSyntax))
             {
                 typeSyntax = SyntaxFactory.IdentifierName(columnType.FullName);
             }

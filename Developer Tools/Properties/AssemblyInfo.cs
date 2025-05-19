@@ -1,5 +1,5 @@
 ﻿// <copyright file="AssemblyInfo.cs" company="Gamma Four, Inc.">
-//    Copyright © 2018 - Gamma Four, Inc.  All Rights Reserved.
+//    Copyright © 2025 - Gamma Four, Inc.  All Rights Reserved.
 // </copyright>
 // <author>Donald Roy Airey</author>
 using System;
@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Productivity commands for the Visual Studio environment.")]
 [assembly: AssemblyCompany("GammaFour, Inc.")]
 [assembly: AssemblyProduct("GammaFour")]
-[assembly: AssemblyCopyright("Copyright © 2018, GammaFour, Inc.  All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright © 2025, GammaFour, Inc.  All rights reserved.")]
 
 // Indicates that this assembly is compliant with the Common Language Specification (CLS).
 [assembly: CLSCompliant(false)]
